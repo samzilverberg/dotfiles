@@ -1,0 +1,19 @@
+[push]
+	default = simple
+[user]
+	name = sam zilverberg
+	email = samzilverberg@gmail.com
+	signingkey = 161C9E16C58AC0AA
+[core]
+	autocrlf = input
+	filemode = true
+	excludesfile = /home/samz/.gitignore_global
+[alias]
+# only for github remotes
+#   git pr 4 [someremote] : creates local branch pr/4 from the github remote (optional name, default upstream|origin)
+#   git pr-clean : removes all pr/* branches from your local repo
+  pr  = "!f() { git fetch -fu ${2:-$(git remote |grep ^upstream || echo origin)} refs/pull/$1/head:pr/$1 && git checkout pr/$1; }; f"
+  pr-clean = "!git for-each-ref refs/heads/pr/* --format='%(refname)' | while read ref ; do branch=${ref#refs/heads/} ; git branch -D $branch ; done"
+
+[commit]
+	gpgsign = true
