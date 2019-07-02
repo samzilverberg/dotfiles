@@ -23,8 +23,6 @@ alias gst="git status"
 eval "$(rbenv init -)" 
 source /usr/share/nvm/init-nvm.sh
 
-# TODO move x settings to .xinitrc (or .xprofile?)
-xset r rate 400 35
 
 colors() {
 	local fgc bgc vals seq0
