@@ -6,23 +6,8 @@
 
 [[ $- != *i* ]] && return
 
-# use gpg-agent as ssh-agent as well 
-# https://wiki.archlinux.org/index.php/GnuPG#SSH_agent
-unset SSH_AGENT_PID
-if [ "${gnupg_SSH_AUTH_SOCK_by:-0}" -ne $$ ]; then
-  export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
-fi
-export GPG_TTY=$(tty)
-gpg-connect-agent updatestartuptty /bye >/dev/null
-
-alias ll="/usr/bin/ls -lah --color=auto --group-directories-first"
-# samz hack to make ls actually be "ll"
-ls() { ll $@; }
-alias gst="git status"
-
-eval "$(rbenv init -)" 
-source /usr/share/nvm/init-nvm.sh
-
+[ -f ~/.aliases ] && source "$HOME/.aliases"
+[ -f ~/.myprofile ] && source "$HOME/.myprofile"
 
 colors() {
 	local fgc bgc vals seq0

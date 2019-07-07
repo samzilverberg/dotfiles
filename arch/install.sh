@@ -8,8 +8,8 @@ error() { clear; printf "ERROR:\\n%s\\n" "$1"; exit;}
 username=$(logname) || $(who am i)
 echo "running as: $username"
 
-# pacman -Sy ||  error "Are you sure you're running this as the root user? Are you sure you're using an Arch-based distro? ;-) Are you sure you have an internet connection? Are you sure your Arch keyring is updated?"
-# pacman --noconfirm -Sy archlinux-keyring || error "Error automatically refreshing Arch keyring. Consider doing so manually."
+pacman -Sy ||  error "Are you sure you're running this as the root user? Are you sure you're using an Arch-based distro? ;-) Are you sure you have an internet connection? Are you sure your Arch keyring is updated?"
+pacman --noconfirm -Sy archlinux-keyring || error "Error automatically refreshing Arch keyring. Consider doing so manually."
 
 # Keep-alive: update existing `sudo` time stamp until script has finished
 #while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
@@ -26,19 +26,13 @@ else
     echo "skipping: yay"
 fi
 
-# kill dropbox in case its pre-installed, otherwise install will hang
-killall dropbox
-
 sudo -u "$username" yay -Sy
 sudo -u "$username" yay -S --noconfirm --sudoloop --needed -q \
   "boostnote-bin"\
   "visual-studio-code-bin" \
-  "jdk11-openjdk"\
-  "jdk8-openjdk"\
   "firefox-developer-edition"\
   "docker"\
   "docker-compose"\
-  "dropbox"\
   "nvm"\
   "sbt"\
   "ruby-build"\
@@ -46,10 +40,31 @@ sudo -u "$username" yay -S --noconfirm --sudoloop --needed -q \
   "gnupg"\
   "gopass"\
   "rambox-bin"\
-  "intellij-idea-ultimate-edition"
+  "intellij-idea-ultimate-edition"\
+  "zsh"\
+  "zsh-zplugin-git"\
+  "veracrypt"\
+  "lutris"\
+  "x2goserver"\
+  "xorg-host"\
+  "xorg-auth"
 
+if command -v "archlinux-java" >/dev/null 2>&1; then
+  echo "tralalala found java, checking for missing versions"
+  archlinux-java status
+  archlinux-java status | grep java-11 && sudo -u "$username" yay -S --noconfirm "jdk11-openjdk"
+  archlinux-java status | grep java-8 && sudo -u "$username" yay -S --noconfirm "jdk8-openjdk"
+else
+  echo "didnt find archlinux-java, installing java from scratch"
+  sudo -u "$username" yay -S --noconfirm --sudoloop --needed -q \
+    "jdk11-openjdk"\
+    "jdk8-openjdk"
+fi
   #"firefox-developer-edition-firefox-symlink-latest"\
 # remove firefox?
+
+#use zsh by default if not set already (will only work after logout->login)
+sudo -i -u $username /bin/sh -c "echo \"$SHELL\" | grep -v zsh && chsh -s $(which zsh)"
 
 #  nvm install node 10 and latest
 echo "installing nvm and node for user"
