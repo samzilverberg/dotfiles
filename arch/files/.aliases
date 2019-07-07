@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# aliases
+
+echo "date -Ins .aliases $0" >> ~/testing
+
+alias ll="/usr/bin/ls -lah --color=auto --group-directories-first"
+# samz hack to make ls actually be "ll"
+ls() { ll $@; }
+alias gst="git status"

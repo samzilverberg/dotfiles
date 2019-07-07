@@ -1,4 +1,6 @@
 #!/bin/sh
 
-setxkbmap -layout us,il -variant "altgr-intl," -option "grp:alt_shift_toggle" &
+echo "date -Ins .xprofile" >> ~/testing
+
+setxkbmap -layout us,il -variant "altgr-intl," -option "grp:alt_shift_toggle"
 xset r rate 400 35
