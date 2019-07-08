@@ -1,7 +1,7 @@
 #!/bin/sh
 
 
-echo "date -Ins .myprofile" >> ~/testing
+echo "$(date -Ins) .myprofile" >> ~/testing
 
 # use gpg-agent as ssh-agent as well 
 # https://wiki.archlinux.org/index.php/GnuPG#SSH_agent

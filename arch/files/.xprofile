@@ -1,6 +1,6 @@
 #!/bin/sh
 
-echo "date -Ins .xprofile" >> ~/testing
+echo "$(date -Ins) .xprofile" >> ~/testing
 
-setxkbmap -layout us,il -variant "altgr-intl," -option "grp:alt_shift_toggle"
-xset r rate 400 35
+#setxkbmap -layout us,il -variant "altgr-intl," -option "grp:alt_shift_toggle"
+#xset r rate 400 35

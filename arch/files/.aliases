@@ -2,9 +2,10 @@
 
 # aliases
 
-echo "date -Ins .aliases $0" >> ~/testing
+echo "$(date -Ins) .aliases $0" >> ~/testing
 
-alias ll="/usr/bin/ls -lah --color=auto --group-directories-first"
-# samz hack to make ls actually be "ll"
-ls() { ll $@; }
+alias ls='ls -lh --color=auto --group-directories-first'
+alias ll='ls -a'
+
+alias ..="cd .."
 alias gst="git status"
