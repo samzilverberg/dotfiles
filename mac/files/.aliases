@@ -2,8 +2,8 @@
 
 # aliases
 
-alias ls='ls -lh --color=auto --group-directories-first'
-alias ll='ls -a'
+alias ls='ls -ahGp'
+alias ll='ls -l'
 
 alias ..="cd .."
 alias gst="git status"

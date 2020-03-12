@@ -10,8 +10,8 @@ xcode-select --install
 
 if command -v "brew" >/dev/null 2>&1; then
   echo "updating brew"
-  # brew update
-  # brew doctor
+  brew update
+  brew doctor
 else
   echo "installing brew"
   /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"

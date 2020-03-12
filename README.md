@@ -6,7 +6,11 @@
 ```
 # clone repo
 cd ~
+# clone for read only
 git clone https://github.com/samzilverberg/dotfiles.git
+# OR clone for maintenance + push
+git clone git@github.com:samzilverberg/dotfiles.git
+
 cd dotfiles
 cd [macos | arch]
 sudo ./install.sh
