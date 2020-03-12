@@ -50,7 +50,7 @@ sudo -u "$username" yay -S --noconfirm --sudoloop --needed -q \
   "xorg-auth"
 
 if command -v "archlinux-java" >/dev/null 2>&1; then
-  echo "tralalala found java, checking for missing versions"
+  echo "found archlinux-java, checking for missing versions"
   archlinux-java status
   archlinux-java status | grep java-11 && sudo -u "$username" yay -S --noconfirm "jdk11-openjdk"
   archlinux-java status | grep java-8 && sudo -u "$username" yay -S --noconfirm "jdk8-openjdk"

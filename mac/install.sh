@@ -1,46 +1,86 @@
 #!/bin/sh
 
+if [[ $(id -u) -eq 0 ]] ; then echo "Please DONT run as root, no SUDO" ; exit 1 ; fi
+
+username=$(logname) || $(whoami)
+echo "running as: $username"
+
+
 xcode-select --install
 
-#/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-brew doctor
+if command -v "brew" >/dev/null 2>&1; then
+  echo "updating brew"
+  # brew update
+  # brew doctor
+else
+  echo "installing brew"
+  /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+fi
+
 
 brew install git
 brew install gnupg2
-brew cask install iterm2
-brew cask install osxfuse
-brew cask install qlmarkdown
-brew cask install qlstephen
-brew install bash-completion
-echo "[ -f /usr/local/etc/bash_completion ] && . /usr/local/etc/bash_completion" >> ~/.bash_profile
+brew install wget
 brew install httpie
-brew install nvm
-mkdir -p ~/.nvm
-echo "export NVM_DIR=\"$HOME/.nvm\"" >> ~/.bash_profile
-echo "source \"/usr/local/opt/nvm/nvm.sh\"" >> ~/.bash_profile
-. "$HOME/.bash_profile"
-nvm install node && nvm alias default node
+brew install jq
+brew install youtube-dl
+brew install zsh
+brew install antigen
+brew install fzf
+$(brew --prefix)/opt/fzf/install
 
-# cf-cli needs tap added first, look online for command and add it here
-#brew install cf-cli
+brew install cloudfoundry/tap/cf-cli
 
-brew tap justwatchcom/gopass
-brew install justwatchcom/gopass/gopass
+brew install pinentry-mac
+brew install gopass
 
-
-brew cask install google-chrome
-brew cask install caskroom/versions/java8
 brew install sbt
-brew cask install veracrypt
+brew install ruby-build
 brew install rbenv
-brew install pass
+brew install gradle
+brew install maven
+brew install jenv
+brew install nvm
+
+mkdir -p ~/.nvm
+
+brew cask install java
+brew cask install java11
+brew cask install iterm2
+brew cask install firefox-developer-edition
+
+brew cask install android-platform-tools
+brew cask install google-chrome-dev
+
 brew cask install docker
 brew cask install dropbox
-brew cask install franz
-brew cask install battle-net
+brew cask install jing
+brew cask install lastpass
+brew cask install rambox
+brew cask install spotify
+brew cask install qlmarkdown
+brew cask install qlstephen
+brew cask install veracrypt
+brew cask install virtualbox
+
 brew cask install visual-studio-code
+brew cask install intellij-idea-ce
+
 
 # bitdefender! from site? pkg? cask?
 
 
 # can i remove apps from dock that i never use?
+
+
+# set zsh as shell default shell, need to logout -> login after
+echo $SHELL | grep -v zsh && chsh -s $(which zsh)
+
+## symlinks files
+cd files 
+THISDIR=$(pwd)
+cd $THISDIR; find . -type d | cut -c 3- | xargs -n1 -I{} mkdir -p $HOME/{}
+cd $THISDIR; find . -type f | cut -c 3- | xargs -n1 -I{} ln -svf $(pwd)/{} $HOME/{}
+cd $THISDIR; find . -type l | cut -c 3- | xargs -n1 -I{} ln -svf $(pwd)/{} $HOME/{}
+echo "finished symlinking config"
+cd -

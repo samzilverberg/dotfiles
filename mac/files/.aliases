@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# aliases
+
+alias ls='ls -lh --color=auto --group-directories-first'
+alias ll='ls -a'
+
+alias ..="cd .."
+alias gst="git status"
