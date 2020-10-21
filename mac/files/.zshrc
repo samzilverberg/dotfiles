@@ -12,29 +12,10 @@ antigen init ~/.zshrc_antigen
 # You may need to manually set your language environment
 export LANG=en_US.UTF-8
 
-# load aliases
+# load helper aliases and functions
+[ -f ~/.functions ] && source "$HOME/.functions"
 [ -f ~/.aliases ] && source "$HOME/.aliases"
 
-alias cflogin-gcp-qa='cflogin-gcp natcar-qa'
-alias cflogin-gcp-live='cflogin-gcp natcar-live'
-
-function cflogin-gcp {
-    local VAULT_LOGGEDIN="$(vault print token)"
-    if [[ -z "$VAULT_LOGGEDIN" ]]; then
-      echo "login to vault first via: vault login -method=github"
-      return 1
-    fi
-
-    local TEAM="nature-careers"
-    local API_URL=$(vault read -field=api-snpaas springernature/$TEAM/cloudfoundry)
-    local CF_USER=$(vault read -field=username-snpaas springernature/$TEAM/cloudfoundry)
-    local CF_PASS=$(vault read -field=password-snpaas springernature/$TEAM/cloudfoundry)
-    local CF_ORG=$(vault read -field=org-snpaas springernature/$TEAM/cloudfoundry)
-    local CF_SPACE=$1
-
-    echo "cf login to $API_URL with $CF_ORG $CF_SPACE"
-    cf login -a "$API_URL" -u "$CF_USER" -p "$CF_PASS" -o "$CF_ORG" -s "$CF_SPACE"
-}
 
 # nvm
 export NVM_DIR="$HOME/.nvm"
@@ -54,5 +35,10 @@ eval "$(jenv init -)"
 export JAVA_HOME=`jenv javahome`
 
 eval "$(rbenv init -)"
+
+# conditionaly add postgresql@9.6 to path
+if [ -d "/usr/local/opt/postgresql@9.6/" ]; then
+  export PATH="/usr/local/opt/postgresql@9.6/bin:$PATH"
+fi
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
