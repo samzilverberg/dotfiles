@@ -6,8 +6,6 @@
 
 [[ $- != *i* ]] && return
 
-echo "$(date -Ins) .basrc" >> testing
-
 [ -f ~/.aliases ] && source "$HOME/.aliases"
 [ -f ~/.myprofile ] && source "$HOME/.myprofile"
 

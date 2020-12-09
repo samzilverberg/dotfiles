@@ -5,5 +5,12 @@
     "editor.tabSize": 2,
     "telemetry.enableCrashReporter": false,
     "telemetry.enableTelemetry": false,
-    "explorer.confirmDelete": false
+    "explorer.confirmDelete": false,
+    "files.watcherExclude": {
+        "/home/samz/.cache/**": true,
+        "/home/samz/.dropbox/**": true,
+        "/home/samz/.nvm/**": true,
+        "/home/samz/configbak/**": true,
+        "/home/samz/Games/**": true
+    }
 }
