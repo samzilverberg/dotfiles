@@ -1,6 +1,4 @@
 
-echo "$(date -Ins) .zshrc $0" >> ~/testing
-
 [ -f ~/.aliases ] && source "$HOME/.aliases"
 [ -f ~/.myprofile ] && source "$HOME/.myprofile"
 
@@ -27,6 +25,7 @@ bindkey "^[[1;5D"    backward-word # Ctrl+Left
 bindkey "^[[3~"      delete-char #fn + backspace = delete forward
 bindkey "^[3;5~"     delete-char #fn + backspace
 
+setopt promptsubst
 
 zplugin light zsh-users/zsh-autosuggestions
 zplugin light zsh-users/zsh-completions
@@ -35,10 +34,10 @@ zstyle ":history-search-multi-word" page-size "11"
 zplugin ice silent wait'1'; zplugin load zdharma/history-search-multi-word
 zplugin ice silent wait'!1'; zplugin light zdharma/fast-syntax-highlighting
 
-
 AGKOZAK_FORCE_ASYNC_METHOD=subst-async
 AGKOZAK_MULTILINE=0
 zplugin load agkozak/agkozak-zsh-theme
+
 
 #zstyle :compinstall filename '/home/samz/.zshrc'
 zstyle ':completion:*' menu select

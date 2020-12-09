@@ -2,10 +2,8 @@
 
 # aliases
 
-echo "$(date -Ins) .aliases $0" >> ~/testing
-
 alias ls='ls -lh --color=auto --group-directories-first'
-alias ll='ls -a'
+alias ll='ls -lah'
 
 alias ..="cd .."
 alias gst="git status"
