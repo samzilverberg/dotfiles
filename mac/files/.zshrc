@@ -1,5 +1,10 @@
 
 
+# make paste instant instead of slow one by one char
+# https://github.com/zsh-users/zsh-syntax-highlighting/issues/295#issuecomment-214581607
+# if doesnt work try this link https://github.com/zsh-users/zsh-autosuggestions/issues/238
+zstyle ':bracketed-paste-magic' active-widgets '.self-*' 
+
 # Load Antigen
 source /usr/local/share/antigen/antigen.zsh
 
