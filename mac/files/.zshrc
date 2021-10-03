@@ -21,6 +21,9 @@ export LANG=en_US.UTF-8
 [ -f ~/.functions ] && source "$HOME/.functions"
 [ -f ~/.aliases ] && source "$HOME/.aliases"
 
+# enable zsh tab completions engine 
+#(-C to ignore security checks, not recommended but i share #laptop with wife and it should be safe)
+autoload -Uz compinit && compinit -C
 
 # nvm
 export NVM_DIR="$HOME/.nvm"
@@ -30,10 +33,12 @@ export VAULT_ADDR=https://vault.halfpipe.io
 
 
 # make sure gpg-agent is running, depends on pinetry-mac as well
-if [ ! -f "~/.gnupg/S.gpg-agent" ]; then
-  gpgconf --launch gpg-agent
-fi
-export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
+# 2021-07-01 sam commenting as ssh-agent is failing to add priv keys
+# TODO google how to setup gpg-agent properly so it works with ssh-add
+# if [ ! -f "~/.gnupg/S.gpg-agent" ]; then
+#   gpgconf --launch gpg-agent
+# fi
+# export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
 export GPG_TTY=$(tty)
 
 eval "$(jenv init -)"
