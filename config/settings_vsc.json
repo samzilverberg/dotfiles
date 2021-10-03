@@ -12,5 +12,6 @@
         "/home/samz/.nvm/**": true,
         "/home/samz/configbak/**": true,
         "/home/samz/Games/**": true
-    }
+    },
+    "json.maxItemsComputed": 10000
 }
