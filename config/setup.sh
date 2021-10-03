@@ -33,10 +33,15 @@ git config --global commit.gpgsign true
 mkdir -p ~/.gnupg
 ln -sf "$(pwd)/gpg-agent.conf" ~/.gnupg/gpg-agent.conf
 
+
 if [ "$ISLINUX" = true ]; then
   # visual studio code
   mkdir -p ~/.config/Code/User
   ln -sf "$(pwd)/settings_vsc.json" ~/.config/Code/User/settings.json
+
+  # mpv
+  mkdir -p ~/.config/mpv
+  ln -sf "$(pwd)/mpv.conf" ~/.config/mpv/mpv.conf
 else
   # mac
   # visual studio code
