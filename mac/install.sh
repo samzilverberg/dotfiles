@@ -18,6 +18,7 @@ else
 fi
 
 
+
 brew install git
 brew install gnupg2
 brew install wget
@@ -44,27 +45,27 @@ brew install nvm
 
 mkdir -p ~/.nvm
 
-brew cask install java
-brew cask install java11
-brew cask install iterm2
-brew cask install firefox-developer-edition
+brew install java8 --cask
+brew install java11 --cask
+brew install iterm2 --cask
+brew install firefox-developer-edition --cask
 
-brew cask install android-platform-tools
-brew cask install google-chrome-dev
+brew install android-platform-tools --cask
+brew install google-chrome-dev --cask
 
-brew cask install docker
-brew cask install dropbox
-brew cask install jing
-brew cask install lastpass
-brew cask install rambox
-brew cask install spotify
-brew cask install qlmarkdown
-brew cask install qlstephen
-brew cask install veracrypt
-brew cask install virtualbox
+brew install docker --cask
+brew install dropbox --cask
+brew install jing --cask
+brew install lastpass --cask
+brew install rambox --cask
+brew install spotify --cask
+brew install qlmarkdown --cask
+brew install qlstephen --cask
+brew install veracrypt --cask
+brew install virtualbox --cask
 
-brew cask install visual-studio-code
-brew cask install intellij-idea-ce
+brew install visual-studio-code --cask
+brew install intellij-idea-ce --cask
 
 
 # bitdefender! from site? pkg? cask?
