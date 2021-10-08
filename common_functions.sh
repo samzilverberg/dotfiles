@@ -8,7 +8,7 @@ ask_sudo_access() {
 }
 
 clone_dotfiles_repo() {
-  local readonly repository="https://github.com/samzilverberg/dotfiles.git"
+  local readonly repository="git@github.com:samzilverberg/dotfiles.git"
   local readonly clone_target="${HOME}/dotfilestest"
   if [ -d "$clone_target" ] && [ -n '$(cat "$clone_target/.git/config" | grep "$repository")' ]; then
     cd "${clone_target}"
