@@ -1,5 +1,6 @@
-#!/usr/bin/sh
+#!/bin/sh
 
+echo "applying mac settings"
 # Close any open System Preferences panes, to prevent them from overriding
 # settings we’re about to change
 osascript -e 'tell application "System Preferences" to quit'
@@ -7,8 +8,25 @@ osascript -e 'tell application "System Preferences" to quit'
 # Ask for the administrator password upfront
 sudo -v
 
-# Keep-alive: update existing `sudo` time stamp until `.macos` has finished
-while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+# Show battery percentage
+defaults write com.apple.menuextra.battery ShowPercent -string "YES"
+
+# Disable automatic capitalization, smart dashes, automatic period, 
+# smart quotes, auto-correct
+defaults write NSGlobalDomain NSAutomaticCapitalizationEnabled -bool false;
+defaults write NSGlobalDomain NSAutomaticDashSubstitutionEnabled -bool false;
+defaults write NSGlobalDomain NSAutomaticPeriodSubstitutionEnabled -bool false;
+defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false;
+defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool false;
+defaults write NSGlobalDomain NSAutomaticTextCompletionEnabled -bool false
+defaults write com.apple.TextEdit NSAutomaticTextCompletionEnabled -bool false
+# ^^ to undo
+# defaults delete com.apple.TextEdit NSAutomaticCapitalizationEnabled
+
+ 
+# Enable full keyboard access for all controls (e.g. enable Tab in modal dialogs)
+defaults write NSGlobalDomain AppleKeyboardUIMode -int 3;
+
 
 # Trackpad: enable tap to click for this user and for the login screen
 defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
@@ -29,9 +47,11 @@ defaults write NSGlobalDomain com.apple.swipescrolldirection -bool false
 defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadTwoFingerFromRightEdgeSwipeGesture -int 0
 defaults write com.apple.AppleMultitouchTrackpad TrackpadTwoFingerFromRightEdgeSwipeGesture -int 0
 
+# Disable the "Are you sure you want to open this application?" dialog.
+defaults write com.apple.LaunchServices LSQuarantine -bool false
 
 # Set a blazingly fast keyboard repeat rate
-defaults write NSGlobalDomain KeyRepeat -int 2
+defaults write NSGlobalDomain KeyRepeat -int 1
 defaults write NSGlobalDomain InitialKeyRepeat -int 15
 defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool true
 
@@ -39,8 +59,8 @@ defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool true
 # Set language and text formats
 # Note: if you’re in the US, replace `EUR` with `USD`, `Centimeters` with
 # `Inches`, `en_GB` with `en_US`, and `true` with `false`.
-defaults write NSGlobalDomain AppleLanguages -array "en" "nl"
-defaults write NSGlobalDomain AppleLocale -string "en_GB@currency=EUR"
+defaults write NSGlobalDomain AppleLanguages -array "en-US" "he-GB"
+defaults write NSGlobalDomain AppleLocale -string "en_US@currency=EUR"
 defaults write NSGlobalDomain AppleMeasurementUnits -string "Centimeters"
 defaults write NSGlobalDomain AppleMetricUnits -bool true
 
@@ -54,7 +74,15 @@ defaults write com.apple.dock autohide -bool true
 defaults write com.apple.dock magnification -bool true
 defaults write com.apple.dock tilesize -int 50
 
+# Don’t automatically rearrange Spaces based on most recent use
+defaults write com.apple.dock mru-spaces -bool false
 
+# onlt show open apps in dock
+defaults write com.apple.dock static-only -bool true
+
+# defaults write com.apple.dock persistent-apps -array    # Delete all apps from dock.
+
+killall Dock
 
 ##########
 # Finder stuff
@@ -62,3 +90,47 @@ defaults write com.apple.dock tilesize -int 50
 
 # Show the /Volumes folder
 sudo chflags nohidden /Volumes
+# show hidden files
+defaults write com.apple.Finder AppleShowAllFiles true
+
+# Finder: show all filename extensions
+defaults write NSGlobalDomain AppleShowAllExtensions -bool true
+
+# show path bar
+defaults write com.apple.finder ShowPathbar -bool true
+
+# Disable the warning when changing a file extension
+defaults write com.apple.finder FXEnableExtensionChangeWarning -bool false
+
+# Disable the warning before emptying the Trash
+defaults write com.apple.finder WarnOnEmptyTrash -bool false
+
+# When performing a search, search the current folder by default
+defaults write com.apple.finder FXDefaultSearchScope -string "SCcf"
+
+# Avoid creating .DS_Store files on network or USB volumes
+defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
+defaults write com.apple.desktopservices DSDontWriteUSBStores -bool true
+
+defaults write com.apple.finder QuitMenuItem -bool true                      # Allow quitting finder via ⌘ + Q.
+
+killall Finder
+
+
+# Use plain text mode for new TextEdit documents.
+defaults write com.apple.TextEdit RichText -int 0
+
+# Open and save files as UTF-8 in TextEdit.
+defaults write com.apple.TextEdit PlainTextEncoding -int 4
+defaults write com.apple.TextEdit PlainTextEncodingForWrite -int 4
+
+# Automatically quit printer app once the print jobs complete.
+defaults write com.apple.print.PrintingPrefs "Quit When Finished" -bool true
+
+# Prevent Photos from opening automatically when devices are plugged in.
+defaults -currentHost write com.apple.ImageCapture disableHotPlug -bool true
+
+# Stop iTunes from responding to the keyboard media keys.
+launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist 2> /dev/null
+
+echo "done applying mac settings"
