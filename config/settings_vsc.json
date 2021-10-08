@@ -13,5 +13,6 @@
         "/home/samz/configbak/**": true,
         "/home/samz/Games/**": true
     },
-    "json.maxItemsComputed": 10000
+    "json.maxItemsComputed": 10000,
+    "window.zoomLevel": 1
 }

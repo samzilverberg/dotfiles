@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -euo pipefail
+
 # setup script will install all the packages & programs i like to use
 # run this as sudo
 

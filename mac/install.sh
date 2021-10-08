@@ -1,87 +1,116 @@
 #!/bin/sh
 
+THISDIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+source "$(dirname $THISDIR)/common_functions.sh"
+
 if [[ $(id -u) -eq 0 ]] ; then echo "Please DONT run as root, no SUDO" ; exit 1 ; fi
 
 username=$(logname) || $(whoami)
 echo "running as: $username"
 
+ask_sudo_access
 
-xcode-select --install
-
+# installing brew. this will automatically install xcode dev tools
+# xcode-select --install  
 if command -v "brew" >/dev/null 2>&1; then
   echo "updating brew"
   brew update
   brew doctor
 else
   echo "installing brew"
-  /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+  printf "\n" | /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 
+clone_dotfiles_repo
+
+brew_install() {
+  brew install "$1"
+}
+
+brew_cask_install() {
+  brew install --cask "$1"
+}
+
+# fnm is a replacement for nvm
+brew_packages="""
+git
+gnupg2
+wget
+httpie
+jq
+youtube-dl
+zsh
+fnm
+antigen
+pinentry-mac
+gopass
+gradle
+coreutils
+"""
+
+for PKG in $brew_packages; do {
+  brew_install "$PKG"
+}; done
 
 
-brew install git
-brew install gnupg2
-brew install wget
-brew install httpie
-brew install jq
-brew install youtube-dl
-brew install zsh
-brew install antigen
-brew install fzf
-$(brew --prefix)/opt/fzf/install
+# fzf
+command -v fzf >/dev/null 2>&1 || {
+  brew_install fzf
+  $(brew --prefix)/opt/fzf/install
+}
 
-brew install cloudfoundry/tap/cf-cli
 
-brew install pinentry-mac
-brew install gopass
+brew_cask_packages="""
+iterm2
+firefox
+google-chrome
+android-platform-tools
+docker
+dropbox
+lastpass
+qlmarkdown
+qlstephen
+rambox
+veracrypt
+virtualbox
+visual-studio-code
+intellij-idea-ce
+"""
 
-brew install sbt
-brew install ruby-build
-brew install rbenv
-brew install gradle
-brew install maven
-brew install jenv
-brew install nvm
+for PKG in $brew_cask_packages; do {
+  brew_cask_install "$PKG"
+}; done
 
-mkdir -p ~/.nvm
 
-brew install java8 --cask
-brew install java11 --cask
-brew install iterm2 --cask
-brew install firefox-developer-edition --cask
+# java using sdkman
+[ -f "$HOME/.sdkman/bin/sdkman-init.sh" ] || {
+  echo "installing sdkman"
+  curl -s "https://get.sdkman.io?rcupdate=false" | bash
+}
 
-brew install android-platform-tools --cask
-brew install google-chrome-dev --cask
+source "$HOME/.sdkman/bin/sdkman-init.sh"
+sdk install java 8.0.302-tem < /dev/null
+sdk install java 11.0.12-tem < /dev/null
 
-brew install docker --cask
-brew install dropbox --cask
-brew install jing --cask
-brew install lastpass --cask
-brew install rambox --cask
-brew install spotify --cask
-brew install qlmarkdown --cask
-brew install qlstephen --cask
-brew install veracrypt --cask
-brew install virtualbox --cask
-
-brew install visual-studio-code --cask
-brew install intellij-idea-ce --cask
+# java using brew
+# brew tap homebrew/cask-versions
+# brew_cask_install temurin8 --cask
+# brew_cask_install temurin11 --cask
 
 
 # bitdefender! from site? pkg? cask?
 
 
-# can i remove apps from dock that i never use?
-
-
 # set zsh as shell default shell, need to logout -> login after
-echo $SHELL | grep -v zsh && chsh -s $(which zsh)
+echo $SHELL | grep -v zsh && chsh -s $(which zsh) && echo "LOGOUT+LOGIN is required for zsh to work"
 
 ## symlinks files
-cd files 
-THISDIR=$(pwd)
-cd $THISDIR; find . -type d | cut -c 3- | xargs -n1 -I{} mkdir -p $HOME/{}
-cd $THISDIR; find . -type f | cut -c 3- | xargs -n1 -I{} ln -svf $(pwd)/{} $HOME/{}
-cd $THISDIR; find . -type l | cut -c 3- | xargs -n1 -I{} ln -svf $(pwd)/{} $HOME/{}
+cd "$THISDIR/files" 
+FILESDIR=$(pwd)
+cd $FILESDIR; find . -type d | cut -c 3- | xargs -n1 -I{} mkdir -p $HOME/{}
+cd $FILESDIR; find . -type f | cut -c 3- | xargs -n1 -I{} ln -svf $(pwd)/{} $HOME/{}
+cd $FILESDIR; find . -type l | cut -c 3- | xargs -n1 -I{} ln -svf $(pwd)/{} $HOME/{}
 echo "finished symlinking config"
-cd -
+cd "$THISDIR"
+
+"$THISDIR/macos_settings.sh"

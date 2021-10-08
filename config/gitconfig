@@ -9,7 +9,7 @@
 [core]
 	autocrlf = input
 	filemode = true
-	excludesfile = /home/samz/.gitignore_global
+	excludesfile = ~/.gitignore_global
 [alias]
 # only for github remotes
 #   git pr 4 [someremote] : creates local branch pr/4 from the github remote (optional name, default upstream|origin)
