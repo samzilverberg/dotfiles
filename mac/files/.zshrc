@@ -22,7 +22,7 @@ export LANG=en_US.UTF-8
 autoload -Uz compinit && compinit -C
 
 # fnm (nvm replacement)
-command -v jenv >/dev/null 2>&1 && {
+command -v fnm >/dev/null 2>&1 && {
   eval "$(fnm env)"
   alias nvm="fnm"
 }
