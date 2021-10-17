@@ -133,4 +133,33 @@ defaults -currentHost write com.apple.ImageCapture disableHotPlug -bool true
 # Stop iTunes from responding to the keyboard media keys.
 launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist 2> /dev/null
 
+# change to cmd+shift+q to quit for some apps (to avoid accidental cmd+q)
+defaults write org.mozilla.firefox NSUserKeyEquivalents -dict-add 'Quit Firefox' '@$q'
+defaults write com.google.Chrome NSUserKeyEquivalents -dict-add 'Quit Google Chrome' '@$q'
+defaults write com.microsoft.VSCode NSUserKeyEquivalents -dict-add 'Quit Visual Studio Code' '@$q'
+
+# write the above to ~/Library/Preferences/com.apple.universalaccess so it will appear in GUI are of keyboard->shortcuts->app shortcuts
+addCustomMenuEntryIfNeeded() {
+  if [[ $# == 0 || $# > 1 ]]; then
+      echo "usage: addCustomMenuEntryIfNeeded com.company.appname"
+      return 1
+  else
+      local contents=`defaults read com.apple.universalaccess "com.apple.custommenu.apps"`
+      local grepResults=`echo $contents | grep $1`
+      if [ -z $grepResults ]; then
+          # does not contain app
+          defaults write com.apple.universalaccess "com.apple.custommenu.apps" -array-add "$1"
+      fi
+  fi
+}
+
+addCustomMenuEntryIfNeeded "org.mozilla.firefox"
+addCustomMenuEntryIfNeeded "com.google.Chrome"
+addCustomMenuEntryIfNeeded "com.microsoft.VSCode"
+
+
+# might help avoid a total restart to get changes to affect immediately
+killall cfprefsd
+killall Finder
+
 echo "done applying mac settings"
