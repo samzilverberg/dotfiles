@@ -70,6 +70,8 @@ dropbox
 lastpass
 qlmarkdown
 qlstephen
+qlcolorcode
+quicklook-json
 rambox
 veracrypt
 virtualbox

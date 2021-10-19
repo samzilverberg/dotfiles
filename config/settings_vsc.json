@@ -14,5 +14,7 @@
         "/home/samz/Games/**": true
     },
     "json.maxItemsComputed": 10000,
-    "window.zoomLevel": 1
+    "window.zoomLevel": 1,
+    "git.autofetch": true,
+    "tabnine.experimentalAutoImports": true
 }
