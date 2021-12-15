@@ -125,4 +125,8 @@ cd $FILESDIR; find . -type l | cut -c 3- | xargs -n1 -I{} ln -svf $(pwd)/{} $HOM
 echo "finished symlinking config"
 cd "$THISDIR"
 
+
+# un-quarantine quicklook plugins
+xattr -cr  ~/Library/QuickLook/QL*.qlgenerator
+
 "$THISDIR/macos_settings.sh"

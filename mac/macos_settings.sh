@@ -11,6 +11,12 @@ sudo -v
 # Show battery percentage
 defaults write com.apple.menuextra.battery ShowPercent -string "YES"
 
+# clock settings : use 24h digital clock with format "Thu 23 Nov 13:37"
+defaults write com.apple.menuextra.clock IsAnalog -bool false
+defaults write com.apple.menuextra.clock Show24Hour -bool true
+defaults write com.apple.menuextra.clock DateFormat "EEE d MMM HH:mm"
+killall SystemUIServer
+
 # Disable automatic capitalization, smart dashes, automatic period, 
 # smart quotes, auto-correct
 defaults write NSGlobalDomain NSAutomaticCapitalizationEnabled -bool false;
@@ -55,6 +61,13 @@ defaults write NSGlobalDomain KeyRepeat -int 1
 defaults write NSGlobalDomain InitialKeyRepeat -int 15
 defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool true
 
+# Keyboard shortcut Disable "Open man page in terminal" & "Search word in terminal man page index"
+defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 123 "<dict><key>enabled</key><false/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>22</integer><integer>262144</integer></array><key>type</key><string>standard</string></dict></dict>"
+defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 124 "<dict><key>enabled</key><false/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>22</integer><integer>262144</integer></array><key>type</key><string>standard</string></dict></dict>"
+
+# https://apple.stackexchange.com/questions/405937/how-can-i-enable-keyboard-shortcut-preference-after-modifying-it-through-defaul
+/System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u
+
 
 # Set language and text formats
 # Note: if you’re in the US, replace `EUR` with `USD`, `Centimeters` with
@@ -66,6 +79,11 @@ defaults write NSGlobalDomain AppleMetricUnits -bool true
 
 # Show language menu in the top right corner of the boot screen
 sudo defaults write /Library/Preferences/com.apple.loginwindow showInputMenu -bool true
+
+# Enable selecting input source by shortcut (Ctrl + Alt(option) + Spacebar)
+defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 60 "<dict><key>enabled</key><false/><key>value</key><dict><key>parameters</key><array><integer>32</integer><integer>49</integer><integer>262144</integer></array><key>type</key><string>standard</string></dict></dict>"
+defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 61 "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>32</integer><integer>49</integer><integer>786432</integer></array><key>type</key><string>standard</string></dict></dict>"
+
 
 ############
 ### dock
@@ -156,7 +174,6 @@ addCustomMenuEntryIfNeeded() {
 addCustomMenuEntryIfNeeded "org.mozilla.firefox"
 addCustomMenuEntryIfNeeded "com.google.Chrome"
 addCustomMenuEntryIfNeeded "com.microsoft.VSCode"
-
 
 # might help avoid a total restart to get changes to affect immediately
 killall cfprefsd
