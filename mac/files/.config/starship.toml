@@ -1,0 +1,38 @@
+format = """
+$username\
+$hostname\
+$directory\
+$git_branch\
+$git_commit\
+$git_state\
+$cmd_duration\
+$status\
+$shell\
+$character"""
+
+right_format = """
+$jobs\
+$time\
+"""
+
+# Inserts a blank line between shell prompts
+add_newline = false
+
+[directory]
+truncate_to_repo=false
+
+[git_branch]
+format="[git](bold blue):\\([$branch]($style)\\) "
+truncation_length=20
+
+[username]
+format="[$user]($style)"
+show_always=false
+
+[hostname]
+format="@[$hostname ]($style)"
+ssh_only=true
+
+[time]
+format="[$time]($style) "
+disabled=false

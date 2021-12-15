@@ -39,6 +39,9 @@ wget
 httpie
 jq
 youtube-dl
+fish
+fisher
+starship
 zsh
 fnm
 antigen
@@ -83,6 +86,9 @@ for PKG in $brew_cask_packages; do {
   brew_cask_install "$PKG"
 }; done
 
+# meslo nerd font
+brew tap homebrew/cask-fonts
+brew install homebrew/cask-fonts/font-meslo-lg-nerd-font
 
 # java using sdkman
 [ -f "$HOME/.sdkman/bin/sdkman-init.sh" ] || {
@@ -103,8 +109,12 @@ sdk install java 11.0.12-tem < /dev/null
 # bitdefender! from site? pkg? cask?
 
 
-# set zsh as shell default shell, need to logout -> login after
-echo $SHELL | grep -v zsh && chsh -s $(which zsh) && echo "LOGOUT+LOGIN is required for zsh to work"
+# set fish as shell default shell, need to logout -> login after
+echo $SHELL | grep -q -v zsh && chsh -s $(which fish) && echo "LOGOUT+LOGIN is required for zsh to work"
+! grep -q fish /etc/shells && echo $(which fish) | sudo tee -a /etc/shells
+echo "TO finish configuring fish as default shell you will need to
+goto Users and Groups -> unlock -> ctrl + click username -> advanced ->
+then put the full path of fish in \"Login shell\""
 
 ## symlinks files
 cd "$THISDIR/files" 
