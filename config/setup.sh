@@ -18,6 +18,25 @@ esac
 echo "is linux? $ISLINUX"
 
 
+# troublehsooting: 
+# if keys expire you can
+# ## NET METHOD
+#    gpg --quick-set-expire KEYID PERIOD
+#    gpg --quick-set-expire KEYID PERIOD '*'
+# ###
+# gpg -k #list them
+# gpg --edit-keys ID #edit
+# expire
+# 3y
+# key 1 #sub key
+# expore
+# 3y
+# trust
+# save
+# ^^ the above cmds in gpg repl will extend the expiry
+# then can export and put where needed:
+#   gpg -a --export KEYID
+#
 # make sure to run as user and not as root
 sudo -i -u $USER /bin/sh << eof
 # gitconfigf file
