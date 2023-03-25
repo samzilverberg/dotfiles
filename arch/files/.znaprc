@@ -1,0 +1,79 @@
+ZNAP_HOME="${ZDOTDIR:-$HOME/.config/zsh}/plugins"
+[[ -f $ZNAP_HOME/zsh-snap/znap.zsh ]] ||
+    git clone --depth 1 https://github.com/marlonrichert/zsh-snap.git $ZNAP_HOME/zsh-snap
+source $ZNAP_HOME/zsh-snap/znap.zsh  # Start Znap
+source ~/.znaprc
+
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+# if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+#   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+# fi
+
+# `znap prompt` makes your prompt visible in just 15-40ms!
+znap prompt romkatv/powerlevel10k
+
+# auto-completions for commands
+znap source ohmyzsh/ohmyzsh plugins/fnm
+
+# znap source marlonrichert/zsh-autocomplete
+# znap source marlonrichert/zsh-edit
+
+# ...or to load only those parts of Oh-My-Zsh or Prezto that you really need:
+# znap source sorin-ionescu/prezto modules/{environment,history}
+# znap source ohmyzsh/ohmyzsh 'lib/(*~(git|theme-and-appearance).zsh)' plugins/git
+
+# `znap source` finds the right file automatically, but you can also specify
+# one (or more) explicitly:
+# znap source asdf-vm/asdf asdf.sh
+
+# znap source marlonrichert/zsh-hist
+# bindkey '^[q' push-line-or-edit
+# bindkey -r '^Q' '^[Q'
+
+znap source zsh-users/zsh-completions
+
+ZSH_AUTOSUGGEST_STRATEGY=( history completion )
+znap source zsh-users/zsh-autosuggestions
+
+# ZSH_HIGHLIGHT_HIGHLIGHTERS=( main brackets )
+znap source zsh-users/zsh-syntax-highlighting
+
+
+# The cache gets regenerated, too, when the eval command has changed. For
+# example, here we include a variable. So, the cache gets invalidated whenever
+# this variable has changed.
+# znap source marlonrichert/zcolors
+# znap eval   marlonrichert/zcolors "zcolors ${(q)LS_COLORS}"
+
+
+
+# `znap source` automatically downloads and starts your plugins.
+# znap source marlonrichert/zsh-autocomplete
+# znap source zsh-users/zsh-autosuggestions
+# znap source zsh-users/zsh-syntax-highlighting
+
+
+
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+# PZ old stuff from here
+# some zsh fns used by prompts
+# pz source ohmyzsh/ohmyzsh lib/git
+# pz source ohmyzsh/ohmyzsh lib/theme-and-appearance
+
+# utils for command line (suggestions, history search etc)
+# pz source zsh-users/zsh-completions
+# pz source zsh-users/zsh-autosuggestions
+# pz source ohmyzsh/ohmyzsh plugins/colored-man-pages
+## commented out because fzf provides good history search already
+# https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/history-substring-search
+#pz source zsh-users/zsh-history-substring-search
+
+# pz prompt sindresorhus/pure
+# pz source ohmyzsh themes/robbyrussell
+
+#advised to source last
+# pz source zsh-users/zsh-syntax-highlighting

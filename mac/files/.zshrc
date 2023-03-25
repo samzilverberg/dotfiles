@@ -5,8 +5,19 @@
 # if doesnt work try this link https://github.com/zsh-users/zsh-autosuggestions/issues/238
 zstyle ':bracketed-paste-magic' active-widgets '.self-*' 
 
+setopt extended_history
+HISTFILE="$HOME/.histfile"
+HISTSIZE=20000
+SAVEHIST=20000
+
+# bindkey -e
+# bindkey "^[[1;5C"    forward-word # Ctrl+Right
+# bindkey "^[[1;5D"    backward-word # Ctrl+Left
+# bindkey "^[[3~"      delete-char #fn + backspace = delete forward
+# bindkey "^[3;5~"     delete-char #fn + backspace
+
 # Load and init Antigen
-source /usr/local/share/antigen/antigen.zsh
+source /usr/share/zsh/share/antigen.zsh
 antigen init ~/.zshrc_antigen
 
 
