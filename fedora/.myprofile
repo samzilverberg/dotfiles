@@ -1,0 +1,23 @@
+#!/bin/sh
+
+
+# use gpg-agent as ssh-agent as well 
+# https://wiki.archlinux.org/index.php/GnuPG#SSH_agent
+unset SSH_AGENT_PID
+if [ "${gnupg_SSH_AUTH_SOCK_by:-0}" -ne $$ ]; then
+  export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
+fi
+export GPG_TTY=$(tty)
+gpg-connect-agent updatestartuptty /bye >/dev/null
+
+
+eval "$(rbenv init -)" 
+# todo replace with fnm
+#source /usr/share/nvm/init-nvm.sh
+
+if [ -d "/opt/android-sdk" ]; then
+  export ANDROID_SDK_ROOT=/opt/android-sdk
+  export PATH=$PATH:$ANDROID_SDK_ROOT/tools
+  export PATH=$PATH:$ANDROID_SDK_ROOT/tools/bin
+  export PATH=$PATH:$ANDROID_SDK_ROOT/platform-tools
+fi

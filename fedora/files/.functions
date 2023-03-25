@@ -1,0 +1,6 @@
+#!/bin/sh
+
+function git-cleanup {
+  git fetch --prune
+  for branch in $(git for-each-ref --format='%(if:equals=[gone])%(upstream:track)%(then)%(refname:short)%(end)' refs/heads); do git branch -D $branch; done
+}

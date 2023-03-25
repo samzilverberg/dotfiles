@@ -12,5 +12,12 @@ gpg-connect-agent updatestartuptty /bye >/dev/null
 
 
 eval "$(rbenv init -)" 
-source /usr/share/nvm/init-nvm.sh
+# todo replace with fnm
+#source /usr/share/nvm/init-nvm.sh
 
+if [ -d "/opt/android-sdk" ]; then
+  export ANDROID_SDK_ROOT=/opt/android-sdk
+  export PATH=$PATH:$ANDROID_SDK_ROOT/tools
+  export PATH=$PATH:$ANDROID_SDK_ROOT/tools/bin
+  export PATH=$PATH:$ANDROID_SDK_ROOT/platform-tools
+fi
