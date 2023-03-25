@@ -43,15 +43,24 @@ fish
 fisher
 starship
 zsh
+asdf
 fnm
-antigen
+exa
+the_silver_searcher
 pinentry-mac
 gopass
-gradle
 coreutils
+ffmpeg
+youtube-dl
+homebrew/cask-fonts/font-meslo-lg-nerd-font:homebrew/cask-fonts
 """
 
 for PKG in $brew_packages; do {
+  if echo "$PKG" | grep ":"; then
+    TAP=${PKG#*:}
+    PKG=${PKG%%:*}
+    brew tap "$TAP"
+  fi
   brew_install "$PKG"
 }; done
 
@@ -64,47 +73,47 @@ command -v fzf >/dev/null 2>&1 || {
 
 
 brew_cask_packages="""
+1password
+1password-cli
 iterm2
 firefox
 google-chrome
-android-platform-tools
+bettertouchtool
+karabiner-elements
+obsidian
 docker
 dropbox
-lastpass
+syncthing
 qlmarkdown
 qlstephen
 qlcolorcode
 quicklook-json
-rambox
+ferdium-nightly:ferdium/ferdium
 veracrypt
 virtualbox
 visual-studio-code
 intellij-idea-ce
+android-commandlinetools
 """
+# cscreen # if there are probs with performance on external monitor
 
 for PKG in $brew_cask_packages; do {
+  if echo "$PKG" | grep ":"; then
+    TAP=${PKG#*:}
+    PKG=${PKG%%:*}
+    brew tap "$TAP"
+  fi
   brew_cask_install "$PKG"
 }; done
 
-# meslo nerd font
-brew tap homebrew/cask-fonts
-brew install homebrew/cask-fonts/font-meslo-lg-nerd-font
-
-# java using sdkman
-[ -f "$HOME/.sdkman/bin/sdkman-init.sh" ] || {
-  echo "installing sdkman"
-  curl -s "https://get.sdkman.io?rcupdate=false" | bash
-}
-
-source "$HOME/.sdkman/bin/sdkman-init.sh"
-sdk install java 8.0.302-tem < /dev/null
-sdk install java 11.0.12-tem < /dev/null
-
-# java using brew
-# brew tap homebrew/cask-versions
-# brew_cask_install temurin8 --cask
-# brew_cask_install temurin11 --cask
-
+# java using asdf
+if command -v "asdf" >/dev/null 2>&1; then
+  echo "using asdf to install java"
+  asdf plugin add java https://github.com/halcyon/asdf-java.git
+  asdf install java openjdk-17.0.2
+  asdf global java openjdk-17.0.2
+  ## todo add to .asdfrc java_macos_integration_enable = yes
+fi
 
 # bitdefender! from site? pkg? cask?
 
