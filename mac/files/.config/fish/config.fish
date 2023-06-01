@@ -12,7 +12,6 @@ end
 # end
 
 set -Ux EXA_COLORS "da=1;34:di=1;34"
-set -Ux GITHUB_WORKFLOW_TOKEN "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"
 set -Ux AWS_ECR_REGISTRY "936143655872.dkr.ecr.us-east-1.amazonaws.com"
 set -Ux AWS_CDN_BUCKET "staging.static.payzen.com"
 alias gst="git status"
