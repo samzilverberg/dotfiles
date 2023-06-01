@@ -12,7 +12,6 @@ end
 # end
 
 set -Ux EXA_COLORS "da=1;34:di=1;34"
-set -Ux GITHUB_WORKFLOW_TOKEN "REDACTED_GITHUB_TOKEN"
 set -Ux AWS_ECR_REGISTRY "REDACTED_AWS_ACCOUNT.dkr.ecr.us-east-1.amazonaws.com"
 set -Ux AWS_CDN_BUCKET "REDACTED_CDN_BUCKET"
 alias gst="git status"

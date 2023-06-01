@@ -19,6 +19,5 @@
     "[typescript]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
-    "window.zoomLevel": 1,
     "workbench.colorTheme": "Darcula Theme from IntelliJ"
 }
