@@ -14,6 +14,7 @@ end
 set -Ux EXA_COLORS "da=1;34:di=1;34"
 set -Ux AWS_ECR_REGISTRY "936143655872.dkr.ecr.us-east-1.amazonaws.com"
 set -Ux AWS_CDN_BUCKET "staging.static.payzen.com"
+
 alias gst="git status"
 alias gds="git diff --staged"
 #alias gd="git diff"
@@ -58,6 +59,10 @@ function cat --wraps=bat --description 'bat wrapper for cat'
   bat $argv
 end
 
+function ag --wraps=ag --description 'ag wrapper that adds common options'
+  ag --ignore-dir node_modules --ignore-dir build --ignore tsconfig.build.tsbuildinfo $argv
+end
+
 # abbreviations: after pressing enter or space it expands to the full text of the abbr
 # https://fishshell.com/docs/current/interactive.html#abbreviations
 abbr -a gd git diff
@@ -74,6 +79,8 @@ abbr -a nrb "npm run build"
 abbr -a nrt "npm t"
 abbr -a nrbt "npm run build && npm t"
 abbr -a nribt "npm ci && npm run build && npm t"
+
+abbr -a npmv "npm version"
 
 abbr -a upzcli "npm i -g @payzen/payzen-cli"
 
