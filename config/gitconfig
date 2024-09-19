@@ -5,7 +5,7 @@
 [user]
 	name = sam zilverberg
 	email = samzilverberg@gmail.com
-	signingkey = 161C9E16C58AC0AA
+	signingkey = 2057E1B1377C5C63
 [core]
 	autocrlf = input
 	filemode = true
