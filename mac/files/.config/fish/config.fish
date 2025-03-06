@@ -11,14 +11,23 @@ end
 #     ls -lhaG $argv
 # end
 
-set -Ux EXA_COLORS "da=1;34:di=1;34"
+set -Ux EZA_COLORS "da=1;34:di=1;34"
 set -Ux AWS_ECR_REGISTRY "936143655872.dkr.ecr.us-east-1.amazonaws.com"
 set -Ux AWS_CDN_BUCKET "staging.static.payzen.com"
+set -Ux BAT_THEME "Monokai Extended"
 
 alias gst="git status"
 alias gds="git diff --staged"
 #alias gd="git diff"
 alias gcm="git checkout (git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')"
+alias gcb="git checkout -b"
+alias gl="git log"
+alias gl.="git log ."
+
+alias dev="cd ~/dev"
+alias mono="cd ~/dev/mono/packages"
+alias pzs="cd ~/dev/payzen_server"
+alias servicing="cd ~/dev/payzen_servicing_server/packages"
 
 function kcn -d "switch k8s namespace"
   kubectl config set-context --current --namespace "$argv"
@@ -59,10 +68,6 @@ function cat --wraps=bat --description 'bat wrapper for cat'
   bat $argv
 end
 
-function ag --wraps=ag --description 'ag wrapper that adds common options'
-  ag --ignore-dir node_modules --ignore-dir build --ignore tsconfig.build.tsbuildinfo $argv
-end
-
 # abbreviations: after pressing enter or space it expands to the full text of the abbr
 # https://fishshell.com/docs/current/interactive.html#abbreviations
 abbr -a gd git diff
@@ -84,8 +89,14 @@ abbr -a npmv "npm version"
 
 abbr -a upzcli "npm i -g @payzen/payzen-cli"
 
-abbr -a pzb "pz publish"
+abbr -a pzp "pz publish"
+abbr -a pzpp "pz publish -r patch"
+abbr -a pzpm "pz publish -r minor"
+abbr -a pzpb "pz publish -r beta -f"
 abbr -a pzd "pz deploy"
+
+# the silver searcher, ag, has no config, need to alias common options
+alias ag='ag --ignore-dir node_modules --ignore-dir build --ignore tsconfig.build.tsbuildinfo'
 
 # mass search and replace in files
 function copy-pasta-file-contents --description "copy-pasta-file-contents <lookup> <replace>"
@@ -109,7 +120,6 @@ function npmpzls --description "list payzen npm private packages"
 end
 
 fnm env | source
-navi widget fish | source
 [ -f /usr/local/opt/asdf/libexec/asdf.fish ] && source /usr/local/opt/asdf/libexec/asdf.fish
 [ -f ~/.asdf/plugins/java/set-java-home.fish ] && source ~/.asdf/plugins/java/set-java-home.fish
 
@@ -137,7 +147,64 @@ set -Ux ANDROID_SDK_ROOT "/Users/samz/.android/sdk_root"
 #   command op $argv
 # end
 
+function dockerpushprod --description "re-tag and push a staging docker image to prod (ecr)"
+  if not test -e 'package.json'
+    echo "no package.json in directory, check that you are in right place to run cmd"
+    return
+  end
+  set pkg_version (npm pkg get version)
+  set pkg_version (string trim --chars='"' "$pkg_version")
+  set pkg_name (npm pkg get name)
+  set pkg_name (string trim --chars='"@' "$pkg_name")
+  set img "$pkg_name":"$pkg_version"
+  set stg_img "936143655872.dkr.ecr.us-east-1.amazonaws.com/$img"
+  set prod_img "559800918584.dkr.ecr.us-east-1.amazonaws.com/$img"
+  set is_stg_img_exists (docker images -q --filter=reference="$stg_img" --format "{{.ID}}")
+  # echo "is_stg_img_exists: $is_stg_img_exists"
+  if test -z "$is_stg_img_exists"
+    echo "image not found, pulling it first"
+    echo "docker pull $stg_img"
+    docker pull $stg_img
+  end
+  echo "going to re-tag and push $img from aws staging account to prod"
+  echo "  if it fails maybe you need to docker login to aws ecr"
+  echo "docker tag $stg_img $prod_img"
+  docker tag $stg_img $prod_img
+  echo "docker push $prod_img"
+  docker push $prod_img
+end
+
+function dockerclean --description "force remove docker compose related containers"
+  # docker ps -aq | xargs docker rm -f
+  # was docker compose -p {} rm -f -v -s, trying down instead so it removes networks too
+  docker compose ls -aq | xargs -P3 -n1 -I{} docker compose -p {} down -v -t 5
+end
+
+function __check_buildkit_flag --on-variable PWD --description 'SET FORCE_LEGACY_BUILDKIT=1 on lambda and migration dirs'
+  status --is-command-substitution; and return
+  # if $FORCE_LEGACY_BUILDKIT is empty
+  # if test -z "$FORCE_LEGACY_BUILDKIT"
+  if test -e 'package.json'
+    if string match -rq '(lambda|image|migration|app)$' $PWD
+      # echo "setting FORCE_LEGACY_BUILDKIT to 1 for this folder"
+      set -gx FORCE_LEGACY_BUILDKIT "1"
+      set -gx FORCE_OFFLINE_BUILDKIT "1"
+    end
+  else
+    set -e FORCE_LEGACY_BUILDKIT
+    set -e FORCE_OFFLINE_BUILDKIT
+  end
+end
+
+__check_buildkit_flag
+
 ssh-add -l | grep -q 'The agent has no identities' && ssh-add  --apple-load-keychain
+
+#zoxide is a smarter cd command, inspired by z and autojump. 
+zoxide init --cmd=cd fish | source
+
+# helps gpg understand what the interactive terminal is so ncurses properly comes up for password prompts
+export GPG_TTY=$(tty)
 
 # https://starship.rs/config/
 # config is in ~/.config/starship.toml
