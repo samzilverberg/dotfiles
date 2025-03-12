@@ -6,10 +6,6 @@ end
 function fish_greeting
 end
 
-# added "a" flag, fish default to just "lh"
-# function ll --wraps=ls --description 'List contents of directory using long format'
-#     ls -lhaG $argv
-# end
 
 set -Ux EZA_COLORS "da=1;34:di=1;34"
 set -Ux AWS_ECR_REGISTRY "936143655872.dkr.ecr.us-east-1.amazonaws.com"
@@ -119,12 +115,8 @@ function npmpzls --description "list payzen npm private packages"
   curl -H "Authorization: Bearer $npm_token" "https://registry.npmjs.org/-/org/payzen/package" | jq -S .
 end
 
-fnm env | source
-[ -f /usr/local/opt/asdf/libexec/asdf.fish ] && source /usr/local/opt/asdf/libexec/asdf.fish
-[ -f ~/.asdf/plugins/java/set-java-home.fish ] && source ~/.asdf/plugins/java/set-java-home.fish
-
 # android sdk
-set -Ux ANDROID_SDK_ROOT "/Users/samz/.android/sdk_root"
+# set -Ux ANDROID_SDK_ROOT "/Users/samz/.android/sdk_root"
 
 
 # 1password-cli signin and set session token across terminals
@@ -180,23 +172,23 @@ function dockerclean --description "force remove docker compose related containe
   docker compose ls -aq | xargs -P3 -n1 -I{} docker compose -p {} down -v -t 5
 end
 
-function __check_buildkit_flag --on-variable PWD --description 'SET FORCE_LEGACY_BUILDKIT=1 on lambda and migration dirs'
-  status --is-command-substitution; and return
-  # if $FORCE_LEGACY_BUILDKIT is empty
-  # if test -z "$FORCE_LEGACY_BUILDKIT"
-  if test -e 'package.json'
-    if string match -rq '(lambda|image|migration|app)$' $PWD
-      # echo "setting FORCE_LEGACY_BUILDKIT to 1 for this folder"
-      set -gx FORCE_LEGACY_BUILDKIT "1"
-      set -gx FORCE_OFFLINE_BUILDKIT "1"
-    end
-  else
-    set -e FORCE_LEGACY_BUILDKIT
-    set -e FORCE_OFFLINE_BUILDKIT
-  end
-end
-
-__check_buildkit_flag
+# function __check_buildkit_flag --on-variable PWD --description 'SET FORCE_LEGACY_BUILDKIT=1 on lambda and migration dirs'
+#   status --is-command-substitution; and return
+#   # if $FORCE_LEGACY_BUILDKIT is empty
+#   # if test -z "$FORCE_LEGACY_BUILDKIT"
+#   if test -e 'package.json'
+#     if string match -rq '(lambda|image|migration|app)$' $PWD
+#       # echo "setting FORCE_LEGACY_BUILDKIT to 1 for this folder"
+#       set -gx FORCE_LEGACY_BUILDKIT "1"
+#       set -gx FORCE_OFFLINE_BUILDKIT "1"
+#     end
+#   else
+#     set -e FORCE_LEGACY_BUILDKIT
+#     set -e FORCE_OFFLINE_BUILDKIT
+#   end
+# end
+# 
+# __check_buildkit_flag
 
 ssh-add -l | grep -q 'The agent has no identities' && ssh-add  --apple-load-keychain
 

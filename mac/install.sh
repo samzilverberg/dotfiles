@@ -38,21 +38,25 @@ gnupg2
 wget
 httpie
 jq
-youtube-dl
 fish
 fisher
 starship
+zoxide
 zsh
-asdf
-fnm
-exa
+mise
+bat
+eza
 the_silver_searcher
 pinentry-mac
 gopass
 coreutils
 ffmpeg
-youtube-dl
+yt-dlp
 homebrew/cask-fonts/font-meslo-lg-nerd-font:homebrew/cask-fonts
+kubernetes-cli
+h9s
+helm
+awscli
 """
 
 for PKG in $brew_packages; do {
@@ -79,21 +83,25 @@ iterm2
 firefox
 google-chrome
 bettertouchtool
-karabiner-elements
-obsidian
 docker
 dropbox
-syncthing
+font-hack-nerd-font
+karabiner-elements
+obsidian
 qlmarkdown
 qlstephen
 qlcolorcode
 quicklook-json
-ferdium-nightly:ferdium/ferdium
+raycast
+shottr
+spotify
+syncthing
 veracrypt
 virtualbox
 visual-studio-code
-intellij-idea-ce
-android-commandlinetools
+webstorm
+zoom
+google-cloud-sdk
 """
 # cscreen # if there are probs with performance on external monitor
 
@@ -107,16 +115,12 @@ for PKG in $brew_cask_packages; do {
 }; done
 
 # java using asdf
-if command -v "asdf" >/dev/null 2>&1; then
-  echo "using asdf to install java"
-  asdf plugin add java https://github.com/halcyon/asdf-java.git
-  asdf install java openjdk-17.0.2
-  asdf global java openjdk-17.0.2
-  ## todo add to .asdfrc java_macos_integration_enable = yes
+if command -v "mise" >/dev/null 2>&1; then
+  echo "using mise to install java"
+  mise use -g java@openjdk-21
+  sudo mkdir -p /Library/Java/JavaVirtualMachines/openjdk-21.jdk
+  sudo ln -s ~/.local/share/mise/installs/java/openjdk-21/Contents /Library/Java/
 fi
-
-# bitdefender! from site? pkg? cask?
-
 
 # set fish as shell default shell, need to logout -> login after
 echo $SHELL | grep -q -v zsh && chsh -s $(which fish) && echo "LOGOUT+LOGIN is required for zsh to work"
