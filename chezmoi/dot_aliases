@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# aliases
+
+alias ls='ls -ahGp'
+alias ll='ls -l'
+
+alias ..="cd .."
+alias gst="git status"
+alias gds="git diff --staged"
+alias gd="git diff"
