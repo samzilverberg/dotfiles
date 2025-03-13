@@ -5,6 +5,8 @@
 # if doesnt work try this link https://github.com/zsh-users/zsh-autosuggestions/issues/238
 zstyle ':bracketed-paste-magic' active-widgets '.self-*' 
 
+eval $(/opt/homebrew/bin/brew shellenv)
+
 setopt extended_history
 HISTFILE="$HOME/.histfile"
 HISTSIZE=20000
@@ -17,7 +19,8 @@ SAVEHIST=20000
 # bindkey "^[3;5~"     delete-char #fn + backspace
 
 # Load and init Antigen
-source /usr/share/zsh/share/antigen.zsh
+source /opt/homebrew/share/antigen/antigen.zsh
+#source /usr/share/zsh/share/antigen.zsh
 antigen init ~/.zshrc_antigen
 
 

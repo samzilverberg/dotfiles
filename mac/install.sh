@@ -13,12 +13,17 @@ ask_sudo_access
 # installing brew. this will automatically install xcode dev tools
 # xcode-select --install  
 if command -v "brew" >/dev/null 2>&1; then
-  echo "updating brew"
-  brew update
-  brew doctor
+  if find $(brew --repository)/.git/HEAD -type f -mtime +1d; then
+    echo "updating brew"
+    brew update
+    brex doctor
+  else
+    echo "skip brew update: already updated in last day"
+  fi
 else
   echo "installing brew"
   printf "\n" | /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
 clone_dotfiles_repo
@@ -52,7 +57,7 @@ gopass
 coreutils
 ffmpeg
 yt-dlp
-homebrew/cask-fonts/font-meslo-lg-nerd-font:homebrew/cask-fonts
+font-meslo-lg-nerd-font
 kubernetes-cli
 h9s
 helm
