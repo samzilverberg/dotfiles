@@ -1,6 +1,17 @@
 
 # Sam Zilverberg dotfiles !
 
+
+## WIP chezmoi
+
+NO NEED TO CLONE REPO, steps to start:
+
+- install chezmoi, then
+  - `chezmoi init samzilverberg --branch chezmoi -S ~/dotfiles`
+  - this will init from my git repo, specific branch, and put it in dotfiles dir in home
+
+
+
 ## usage
 
 ```
