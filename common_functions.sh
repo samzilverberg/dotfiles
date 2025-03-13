@@ -8,8 +8,11 @@ ask_sudo_access() {
 }
 
 clone_dotfiles_repo() {
-  local readonly repository="git@github.com:samzilverberg/dotfiles.git"
-  local readonly clone_target="${HOME}/dotfilestest"
+  #todo switch to git@ based url only if private key is detected, can also tests against it "git ssh repo?"
+  #todo add remove (or switch remote) if priv key is available? so we can git push without password?
+  #local readonly repository="git@github.com:samzilverberg/dotfiles.git"
+  local readonly repository="https://github.com/samzilverberg/dotfiles.git"
+  local readonly clone_target="${HOME}/dotfiles"
   if [ -d "$clone_target" ] && [ -n '$(cat "$clone_target/.git/config" | grep "$repository")' ]; then
     cd "${clone_target}"
     git status
