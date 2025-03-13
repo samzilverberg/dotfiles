@@ -1,0 +1,16 @@
+antigen use oh-my-zsh
+
+# auto-completions for commands
+#   non added
+
+# utils for command line (suggestions, history search etc)
+antigen bundle zsh-users/zsh-completions
+antigen bundle zsh-users/zsh-autosuggestions
+antigen bundle zsh-users/zsh-syntax-highlighting
+## commented out because fzf provides good history search already
+# https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/history-substring-search
+#antigen bundle zsh-users/zsh-history-substring-search
+
+antigen theme robbyrussell
+
+antigen apply

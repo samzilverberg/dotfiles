@@ -1,0 +1,76 @@
+#!/bin/sh
+
+# helper functions
+
+function cflogin-gcp {
+  local TEAM=$1
+  local CF_SPACE=$2
+  local API_URL
+  local CF_USER
+  local CF_PASS
+  local CF_ORG
+
+  echo "cflogin-gcp args: $1, $2"
+
+  if [[ "$1" == "clear" ]]; then
+   echo "clearing local passwords first"
+   security delete-generic-password -a "$USER" -s "sn-cf-gcp-api-url-$TEAM"
+   security delete-generic-password -a "$USER" -s "sn-cf-gcp-user-$TEAM"
+   security delete-generic-password -a "$USER" -s "sn-cf-gcp-pass-$TEAM"
+   security delete-generic-password -a "$USER" -s "sn-cf-gcp-org-$TEAM"
+   return 0
+  elif [ -z "$1" ] || [ -z "$2" ]; then
+    echo "some args are missing: cflogin-gcp <team-name> <cf-space>"
+    return 1
+  fi
+
+  API_URL=$(security find-generic-password -a "$USER" -s "sn-cf-gcp-api-url-$TEAM" -w)
+  CF_USER=$(security find-generic-password -a "$USER" -s "sn-cf-gcp-user-$TEAM" -w)
+  CF_PASS=$(security find-generic-password -a "$USER" -s "sn-cf-gcp-pass-$TEAM" -w)
+  CF_ORG=$(security find-generic-password -a "$USER" -s "sn-cf-gcp-org-$TEAM" -w)
+
+  if [ -z "$API_URL" ] || [ -z "$CF_USER" ] || [ -z "$CF_PASS" ]|| [ -z "$CF_ORG" ]; then
+    echo "one of secrets not in secrity, will try to get from vault"
+    echo "first checking vault login status"
+    local VAULT_LOGGEDIN="$(vault print token)"
+    if [[ -z "$VAULT_LOGGEDIN" ]]; then
+      echo "login to vault first via: vault login -method=github"
+      return 1
+    fi
+    VAULT_LOGGEDIN=$(vault token lookup)
+    if [[ -z "$VAULT_LOGGEDIN" ]]; then
+      echo "login to vault first via: vault login -method=github"
+      return 1
+    fi
+    echo "vault login: ok"
+  fi
+
+
+  if [ -z "$API_URL" ]; then
+    echo "getting vault value for api-url"
+    API_URL=$(vault read -field=api-snpaas springernature/$TEAM/cloudfoundry)
+    security add-generic-password -a "$USER" -s "sn-cf-gcp-api-url-$TEAM" -w "$API_URL"
+  fi
+
+  if [ -z "$CF_USER" ]; then
+    echo "getting vault value for cf-user"
+    CF_USER=$(vault read -field=username-snpaas springernature/$TEAM/cloudfoundry)
+    security add-generic-password -a "$USER" -s "sn-cf-gcp-user-$TEAM" -w "$CF_USER"
+  fi
+
+  if [ -z "$CF_PASS" ]; then
+    echo "getting vault value for cf-pass"
+    CF_PASS=$(vault read -field=password-snpaas springernature/$TEAM/cloudfoundry)
+    security add-generic-password -a "$USER" -s "sn-cf-gcp-pass-$TEAM" -w "$CF_PASS"
+  fi
+
+  if [ -z "$CF_ORG" ]; then
+    echo "getting vault value for cf-org"
+    CF_ORG=$(vault read -field=org-snpaas springernature/$TEAM/cloudfoundry)
+    security add-generic-password -a "$USER" -s "sn-cf-gcp-org-$TEAM" -w "$CF_ORG"
+  fi
+
+  echo "cf login to $API_URL with $CF_ORG $CF_SPACE"
+  cf login -a "$API_URL" -u "$CF_USER" -p "$CF_PASS" -o "$CF_ORG" -s "$CF_SPACE"
+}
+
