@@ -1,0 +1,9 @@
+{{- $email := promptStringOnce . "email" "Email address" -}}
+
+[data]
+    email = {{ $email | quote }}
+
+sourceDir = "/Users/samz/dotfiles-cheza"
+
+[git]
+    autoPush = false
