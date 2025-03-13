@@ -1,0 +1,17 @@
+[core]
+	nopager = false
+	cliptimeout = 45
+	parsing = true
+	notifications = true
+	exportkeys = true
+	autoimport = true
+[show]
+	safecontent = false
+[generate]
+	autoclip = false
+[age]
+	usekeychain = false
+[mounts]
+	path = /Users/samz/.local/share/gopass/stores/root
+[mounts "secrets"]
+	path = /Users/samz/secrets/secrets

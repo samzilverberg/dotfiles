@@ -1,0 +1,18 @@
+[profile default]
+region = us-east-1
+output = json
+sso_session = jumpcloud
+sso_account_id = 936143655872
+sso_role_name = PowerUserAccess
+# for devops sso_role_name = AdministratorAccess
+
+[profile prod]
+region = us-east-1
+output = json
+sso_session = jumpcloud
+sso_account_id = 559800918584
+sso_role_name = EngineeringLeadsProd
+
+[sso-session jumpcloud]
+sso_region = us-east-1
+sso_start_url = https://d-9067ed66f4.awsapps.com/start

@@ -1,0 +1,25 @@
+{
+	"auths": {
+		"559800918584.dkr.ecr.us-east-1.amazonaws.com": {},
+		"936143655872.dkr.ecr.us-east-1.amazonaws.com": {}
+	},
+	"credsStore": "desktop",
+	"credHelpers": {
+		"936143655872.dkr.ecr.us-east-1.amazonaws.com": "ecr-login"
+	},
+	"currentContext": "desktop-linux",
+	"plugins": {
+		"-x-cli-hints": {
+			"enabled": "true"
+		},
+		"debug": {
+			"hooks": "exec"
+		},
+		"scout": {
+			"hooks": "pull,buildx build"
+		}
+	},
+	"features": {
+		"hooks": "true"
+	}
+}

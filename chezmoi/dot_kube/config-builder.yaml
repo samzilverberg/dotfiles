@@ -1,0 +1,36 @@
+apiVersion: v1
+current-context: buildkit
+kind: Config
+preferences: {}
+clusters:
+  - cluster:
+      certificate-authority-data: >-
+        LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURCVENDQWUyZ0F3SUJBZ0lJTUhyVFlIQ0UzMjh3RFFZSktvWklodmNOQVFFTEJRQXdGVEVUTUJFR0ExVUUKQXhNS2EzVmlaWEp1WlhSbGN6QWVGdzB5TXpFeE1EWXhNekE1TXpKYUZ3MHpNekV4TURNeE16RTBNekphTUJVeApFekFSQmdOVkJBTVRDbXQxWW1WeWJtVjBaWE13Z2dFaU1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXdnZ0VLCkFvSUJBUURIQWdzMHAwRE50M3BWcUxGQ3NRa3hZL1RCL3ZOZTBLR2lnT3pRRzJrdm9xZVlualhCRmlTZ2hIdE0KNVo1emNxb3NEUHlPdU5RT2ZtS2toSGhvMEkrYUphSm5ncTFpdXBCT05HUlRXZDJhcWVpb2w5VmxKbG9YWFhPQQpxMUM4Q2tpOGY3OXc2Um45Z1VOSkpDbGlWWkZZV1ovdE85N296dlFiNnhLdlk2c1haT0xYdmtVTW9tc29lQjh2CmtWRnQwbUlMQjlac0VSZWVWMDlsdDVFWFlKYkwvN25yMjNFN3JKcUJtMGZKT3ZNN3V0dFJXZzY4Q1dyUnR5akgKSUJYenE3SWk5MEZiVjV6VUZvNVpoODNOUS9rZGdVc2d2ZnhLUFVrWFdqWkUzVkhLYmxteWI3MlZPYTl0UEl4Ngo0UjRLbW51U0xmZGpKNjFhUStrK1NNNlJkeXRkQWdNQkFBR2pXVEJYTUE0R0ExVWREd0VCL3dRRUF3SUNwREFQCkJnTlZIUk1CQWY4RUJUQURBUUgvTUIwR0ExVWREZ1FXQkJUM0daNUdMNjZtR21hcStlUUdiZVhUa3A0NkVEQVYKQmdOVkhSRUVEakFNZ2dwcmRXSmxjbTVsZEdWek1BMEdDU3FHU0liM0RRRUJDd1VBQTRJQkFRQ2dGNGxIUVhpegppZ1laOFZCRTgrb01mMkZqeWZQOUwxVTFwWlB4WjRwUEUwZExPSzZXd1RobzZESmRJeXNmalhaWCtpcWxxYnZmCjNzcEJTRlM0ellzTE4yeVIzRlR6YjNMUXl6M2k1UUtwWXhXWTNORzF3WU1FM2xHTG5zSkFJdWt1M1BNZWNJaW0KQVA4STNpdy9KNmRLbkFqWGJMY090LzRTbVgzSHhsd1grN3IyV2R0T3JLa2VRbm5wQzJvYlVwZzVZc3lqQy9HMgpTdmRSb0VJQzdyUlR6ekt6NDN6NjlGMDY3WWIyUEYwK3Q0ZGlLNlRUTVFuSU90NlRLaVJBQ1BaWVVEZEdiMzNzCkFBQ084S01kbGMvcXIxeU02Rk03WEpMdFNMNWxJaHRGSlczazBOc2wzcXA1NFBxOVhWR1A0WEhLUHdLa0FlL0IKR25mcXhNTC9jV3FHCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+      server: >-
+        https://125076F84231A9F71379647D407619AD.sk1.il-central-1.eks.amazonaws.com
+    name: arn:aws:eks:il-central-1:936143655872:cluster/buildkit
+contexts:
+  - context:
+      cluster: arn:aws:eks:il-central-1:936143655872:cluster/buildkit
+      user: arn:aws:eks:il-central-1:936143655872:cluster/buildkit
+    name: buildkit
+users:
+  - name: arn:aws:eks:il-central-1:936143655872:cluster/buildkit
+    user:
+      exec:
+        apiVersion: client.authentication.k8s.io/v1beta1
+        args:
+          - '--region'
+          - il-central-1
+          - eks
+          - get-token
+          - '--cluster-name'
+          - buildkit
+          - '--output'
+          - json
+        command: aws
+        env:
+          - name: AWS_PROFILE
+            value: default
+        interactiveMode: IfAvailable
+        provideClusterInfo: false
