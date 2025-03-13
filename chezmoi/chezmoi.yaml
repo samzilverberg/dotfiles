@@ -1,0 +1,3 @@
+sourceDir: /home/samz/dotfiles-chez
+git:
+    autoPush: false
