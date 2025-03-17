@@ -10,6 +10,7 @@ fi
 
 if [[ ! $(command -v op) ]]; then
     brew bundle --file=/dev/stdin <<EOF
+brew "fish"
 brew "git"
 brew "gnupg2"
 brew "pinentry-mac"
@@ -18,6 +19,14 @@ cask "1password"
 EOF
 fi
 {{ end -}}
+
+# set fish as shell default shell, might need to logout -> login after
+echo $SHELL | grep -q -v zsh && chsh -s $(which fish) && echo "LOGOUT+LOGIN is required for zsh to work"
+! grep -q fish /etc/shells && echo $(which fish) | sudo tee -a /etc/shells
+# this replace the manual 
+# "system settings -> Users and Groups -> unlock -> ctrl + click username -> advanced -> put full path of fish in \"Login shell\"
+sudo dscl . -read /Users/$USER UserShell | grep -q fish && sudo dscl . -create /Users/$USER UserShell $(which fish)
+
 
 if [[ ! $(op account list | grep samzilverberg) ]]; then
   # TODO echo with RED color
