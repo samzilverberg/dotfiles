@@ -1,0 +1,16 @@
+# ssh directory management
+[ssh_config]
+
+[ssh_config.payzen]
+  # github work
+  filename = "payzen"
+  op_id = "f26sojc6mzvtqm3tdpe2gwyqre"
+  op_account = "5HSUGBVO4NGS3DEQAOTXIRHSQM"
+  op_read_private_key = "op://dotfiles/f26sojc6mzvtqm3tdpe2gwyqre/private key?ssh-format=openssh"
+
+[ssh_config.github_non_work]
+  # github non work
+  filename = "github_nonwork"
+  op_id = "qwgel452mwltnwsqvueewup65y"
+  op_account = "5HSUGBVO4NGS3DEQAOTXIRHSQM"
+  op_read_private_key = "op://dotfiles/qwgel452mwltnwsqvueewup65y/private key?ssh-format=openssh"

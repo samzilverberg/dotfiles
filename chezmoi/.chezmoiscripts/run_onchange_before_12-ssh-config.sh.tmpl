@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+# todo change file to run_once_before
+echo "creating ssh config file"
+
+{{ $ssh_dir := joinPath $.chezmoi.homeDir ".ssh" }}
+
+# NOTE: the config file is also managed by chezmoi, using the same template,
+# so maybe this cat to file script is not needed?
+cat > "{{ $ssh_dir }}/config"  <<EOF
+{{ template "ssh_config" . -}}
+EOF
+
+# TODO: known hosts? from op because its a history of what i connected to (so kind of secret)
+
+# TODO: ssh-add all private keys? maybe in previous file?
