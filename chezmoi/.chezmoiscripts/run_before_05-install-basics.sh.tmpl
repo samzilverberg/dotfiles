@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+{{ if eq .chezmoi.os "darwin" }}
+# install package manager (brew) and gain access to secrets (1pass)
+
+if [[ ! $(command -v brew) ]]; then
+    header "🍺  Installing Homebrew"
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
+
+if [[ ! $(command -v op) ]]; then
+    brew bundle --file=/dev/stdin <<EOF
+brew "git"
+brew "gnupg2"
+brew "pinentry-mac"
+cask "1password-cli"
+cask "1password"
+EOF
+fi
+{{ end -}}
+
+if [[ ! $(op account list | grep samzilverberg) ]]; then
+  # TODO echo with RED color
+  printf '
+  =====================================================================
+  not logged in to 1pass.
+  open 1pass, login and enable cli integration from settings->developer
+  =====================================================================
+  '
+  exit 1
+fi
+
+if [[ $(op account list | grep samzilverberg) ]]; then
+  echo "logged in to 1pass, can continue"
+fi

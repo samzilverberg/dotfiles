@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+
+# todo change file to run_once_before
+echo "creating gpg keys if needed"
+
+{{ $gnupg_dir := joinPath $.chezmoi.homeDir ".gnupg" }}
+
+# todo make sure some brew pkgs are pre-installed: gnupg, pinetry, more?
+# todo restart gpg after changes? or not needed?
+
+# NOTE: atm the script just checks if gpg -K or gpg -k returns any keys, if not, it imports from 1password
+{{ if not (stat $gnupg_dir) }}
+  echo "creating missing .gnupg dir: {{ $gnupg_dir }}"
+  gpg -k
+{{ end -}}
+
+{{ $gpg_public_keys_output := output "gpg" "--list-keys" }}
+{{ $gpg_secret_keys_output := output "gpg" "--list-secret-keys" }}
+
+# if no keys found, import from 1password
+{{ if or (not (contains "pub" $gpg_public_keys_output)) (not (contains "sec" $gpg_secret_keys_output)) }}
+  echo "no gpg keys found, importing from 1password"
+  # to debug: op --format json item get sjctvxkxjteiffussgini63rcu
+  {{ $opitem := onepassword "sjctvxkxjteiffussgini63rcu" "" "5HSUGBVO4NGS3DEQAOTXIRHSQM" }}
+  {{ $gpg_all_private := false}}
+  {{ $gpg_all_public := false}}
+  {{ $gpg_trust_levels := false}}
+  {{ range $opitem.files }}
+    {{ if eq .name "gpg_all_private.asc" }}
+      {{ $gpg_all_private = onepasswordRead (print "op://dotfiles/sjctvxkxjteiffussgini63rcu/" .name) "5HSUGBVO4NGS3DEQAOTXIRHSQM" }}
+    {{ end }}
+    {{ if eq .name "gpg_all_public.asc" }}
+      {{ $gpg_all_public = onepasswordRead (print "op://dotfiles/sjctvxkxjteiffussgini63rcu/" .name) "5HSUGBVO4NGS3DEQAOTXIRHSQM" }}
+    {{ end }}
+    {{ if eq .name "gpg_trust_levels.txt" }}
+      {{ $gpg_trust_levels = onepasswordRead (print "op://dotfiles/sjctvxkxjteiffussgini63rcu/" .name) "5HSUGBVO4NGS3DEQAOTXIRHSQM" }}
+    {{ end }}
+  {{ end }}
+  {{ if $gpg_all_private }}
+      echo "importing private keys"
+      echo "{{ $gpg_all_private }}" | gpg --import
+  {{ end }}
+  {{ if $gpg_all_public }}
+    echo "importing public keys"
+    echo "{{ $gpg_all_public }}" | gpg --import
+  {{ end }}
+  {{ if and $gpg_trust_levels $gpg_all_private }}
+    echo "importing trust levels"
+    # make sure no empty lines are present, otherwise gpg import throws err
+    echo -n "{{ $gpg_trust_levels }}"  | grep -v '^\s*$'| gpg --import-ownertrust
+  {{ end }}
+{{ else }}
+  echo "gpg keys found, skipping import"
+{{ end }}

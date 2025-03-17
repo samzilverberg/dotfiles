@@ -1,0 +1,33 @@
+# NOTE: dont edit this file directly
+# instead edit the template in chezmoi/.chezmoitemplates/ssh_config
+
+Host github
+  HostName github.com
+  IdentityFile ~/.ssh/payzen_priv
+  IdentitiesOnly yes
+{{- if eq .chezmoi.os "darwin" }}
+  UseKeychain    yes
+{{- else }}
+  AddKeysToAgent yes
+{{- end }}
+
+Host bitbucket
+  HostName bitbucket.org
+  IdentityFile ~/.ssh/bitbucket_priv
+  IdentitiesOnly yes
+{{- if eq .chezmoi.os "darwin" }}
+  UseKeychain    yes
+{{- else }}
+  AddKeysToAgent yes
+{{- end }}
+
+Host *
+  IgnoreUnknown UseKeychain,AddKeysToAgent
+
+# maybe working way to match os via ssh_config matcher command
+# Host *
+#   IgnoreUnknown UseKeychain,AddKeysToAgent
+# Match exec "uname -s | grep Darwin"
+#   UseKeychain yes
+# Match exec "uname -s | grep Linux"
+#   AddKeysToAgent yes

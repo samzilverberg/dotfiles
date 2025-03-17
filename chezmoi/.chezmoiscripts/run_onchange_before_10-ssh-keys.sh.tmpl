@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+
+# todo change file to run_once_before
+
+echo "creating ssh keys if needed"
+
+
+{{ $ssh_dir := joinPath $.chezmoi.homeDir ".ssh" }}
+
+# iterate over ssh_config data & create public/private keys if not present
+{{ range .ssh_config }}
+
+{{ $privatekey_filename := print .filename "_priv" }}
+{{ $privatekey_path := joinPath $ssh_dir $privatekey_filename}}
+{{ $createPrivate := false }}
+{{ if stat $privatekey_path }}
+  echo "skip:   {{ $privatekey_path }}"
+{{else}}  
+  echo "create: {{ $privatekey_path }}" 
+  {{ $createPrivate = true }}
+{{ end }}
+
+{{ $publickey_filename := print .filename "_public" }}
+{{ $publickey_path := joinPath $ssh_dir $publickey_filename}}
+{{ $createPublic := false }}
+{{ if stat $publickey_path }}
+  echo "skip:   {{ $publickey_path }}"
+{{else}}  
+  echo "create: {{ $publickey_path }}" 
+  {{ $createPublic = true }}
+{{ end }}
+
+
+{{ if or $createPrivate $createPublic }}
+  {{ if $createPrivate }}
+    echo "{{ onepasswordRead .op_read_private_key .op_account }}" >"{{ $privatekey_path }}"
+    chmod 400 "{{ $privatekey_path }}"
+    # test that the key works, ATM only github url is tested, if need more add to ssh_config and adapt
+    ssh -i {{ $privatekey_path }} -T git@github.com &>/dev/null 2>$1
+    EXITCODE=$?
+    if [[ $EXITCODE -eq 1 ]]; then
+      echo "key works: {{ $privatekey_path }}"
+    else 
+      echo "key doesnt work: {{ $privatekey_path }}"
+    fi
+  {{ end }}
+  {{ if $createPublic }}
+    {{ $opitem := onepassword .op_id "" .op_account }}
+    echo "{{ range $opitem.fields }}{{ if or (eq .label "pubKey") (eq .label "public key") }}{{ .value }}{{ end }}{{ end }}" >"{{ $publickey_path }}"
+    chmod 400 "{{ $publickey_path }}"
+  {{ end }}
+{{ end }}
+
+{{ end -}}
