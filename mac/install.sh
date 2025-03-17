@@ -59,7 +59,7 @@ ffmpeg
 yt-dlp
 font-meslo-lg-nerd-font
 kubernetes-cli
-h9s
+k9s
 helm
 awscli
 """
@@ -130,9 +130,10 @@ fi
 # set fish as shell default shell, need to logout -> login after
 echo $SHELL | grep -q -v zsh && chsh -s $(which fish) && echo "LOGOUT+LOGIN is required for zsh to work"
 ! grep -q fish /etc/shells && echo $(which fish) | sudo tee -a /etc/shells
-echo "TO finish configuring fish as default shell you will need to
-goto Users and Groups -> unlock -> ctrl + click username -> advanced ->
-then put the full path of fish in \"Login shell\""
+# this replace the manual 
+# "system settings -> Users and Groups -> unlock -> ctrl + click username -> advanced -> put full path of fish in \"Login shell\"
+sudo dscl . -read /Users/$USER UserShell | grep -q fish && sudo dscl . -create /Users/$USER UserShell $(which fish)
+
 
 ## symlinks files
 cd "$THISDIR/files" 
