@@ -1,9 +1,0 @@
-environments:
-  local:
-    context: docker-desktop
-  staging:
-    context: staging
-  sandbox:
-    context: sandbox
-updates:
-  lastCheckTimestamp: 1742223811630
