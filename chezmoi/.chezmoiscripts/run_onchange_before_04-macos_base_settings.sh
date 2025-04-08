@@ -17,27 +17,47 @@ sudo -v
 # Show battery percentage
 defaults write com.apple.menuextra.battery ShowPercent -string "YES"
 
-# clock settings : use 24h digital clock with format "Thu 23 Nov 13:37"
+# date/time/locale settings
+#   use 24h digital clock with format "Thu Nov 23 13:37"
 defaults write com.apple.menuextra.clock IsAnalog -bool false
+defaults write com.apple.menuextra.clock ShowAMPM -bool false
+defaults write com.apple.menuextra.clock ShowDate -bool true
 defaults write com.apple.menuextra.clock Show24Hour -bool true
-defaults write com.apple.menuextra.clock DateFormat "EEE d MMM HH:mm"
+defaults write com.apple.menuextra.clock DateFormat "EEE MMM d  H:mm"
+##  NOTE: if  "write -g" doesnt work then can replace with "write NSGlobalDomain ...:
+defaults write -g AppleICUForce24HourTime -bool true
+#   language and measurement units
+defaults write -g AppleLanguages -array "en-US" "he-GB"
+defaults write -g AppleLocale -string "en_US@currency=EUR"
+defaults write -g AppleMeasurementUnits -string "Centimeters"
+defaults write -g AppleMetricUnits -bool true
+defaults write -g AppleTemperatureUnit -string "Celsius"
+#  date format (general, not clock)
+defaults write -g AppleICUDateFormatStrings -dict-add "1" "d/M/yy"
+defaults write -g AppleICUDateFormatStrings -dict-add "2" "d MMM yy"
+defaults write -g AppleICUDateFormatStrings -dict-add "3" "dd MMMM y"
+defaults write -g AppleICUDateFormatStrings -dict-add "4" "EEEE, d MMMM y"
 killall SystemUIServer
+
+# dont close windows when quitting an app
+# exampele effectt: when iTerm2 updates its windows will preserve
+defaults write -g NSQuitAlwaysKeepsWindows -bool true
 
 # Disable automatic capitalization, smart dashes, automatic period, 
 # smart quotes, auto-correct
-defaults write NSGlobalDomain NSAutomaticCapitalizationEnabled -bool false;
-defaults write NSGlobalDomain NSAutomaticDashSubstitutionEnabled -bool false;
-defaults write NSGlobalDomain NSAutomaticPeriodSubstitutionEnabled -bool false;
-defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false;
-defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool false;
-defaults write NSGlobalDomain NSAutomaticTextCompletionEnabled -bool false
+defaults write -g NSAutomaticCapitalizationEnabled -bool false;
+defaults write -g NSAutomaticDashSubstitutionEnabled -bool false;
+defaults write -g NSAutomaticPeriodSubstitutionEnabled -bool false;
+defaults write -g NSAutomaticQuoteSubstitutionEnabled -bool false;
+defaults write -g NSAutomaticSpellingCorrectionEnabled -bool false;
+defaults write -g NSAutomaticTextCompletionEnabled -bool false
 defaults write com.apple.TextEdit NSAutomaticTextCompletionEnabled -bool false
 # ^^ to undo
 # defaults delete com.apple.TextEdit NSAutomaticCapitalizationEnabled
 
  
 # Enable full keyboard access for all controls (e.g. enable Tab in modal dialogs)
-defaults write NSGlobalDomain AppleKeyboardUIMode -int 3;
+defaults write -g AppleKeyboardUIMode -int 3;
 
 
 # Trackpad: enable tap to click for this user and for the login screen
@@ -52,8 +72,14 @@ defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadRightC
 defaults -currentHost write NSGlobalDomain com.apple.trackpad.trackpadCornerClickBehavior -int 1
 defaults -currentHost write NSGlobalDomain com.apple.trackpad.enableSecondaryClick -bool true
 
+# apple magic mouse: right click when clicking the right side
+defaults write com.apple.driver.AppleBluetoothMultitouch.mouse MouseButtonMode TwoButton
+defaults write com.apple.AppleMultitouchMouse.plist MouseButtonMode TwoButton
+# can try the following if above doesnt work (default is 1 if need to undo)
+# defaults write com.apple.driver.AppleHIDMouse.plist Button2 -int 2
+
 # Disable "natural"  scrolling
-defaults write NSGlobalDomain com.apple.swipescrolldirection -bool false
+defaults write -g com.apple.swipescrolldirection -bool false
 
 # disable notification center gesture
 defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadTwoFingerFromRightEdgeSwipeGesture -int 0
@@ -63,23 +89,31 @@ defaults write com.apple.AppleMultitouchTrackpad TrackpadTwoFingerFromRightEdgeS
 defaults write com.apple.LaunchServices LSQuarantine -bool false
 
 # Set a blazingly fast keyboard repeat rate
-defaults write NSGlobalDomain KeyRepeat -int 1
-defaults write NSGlobalDomain InitialKeyRepeat -int 15
-defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool true
+defaults write -g KeyRepeat -int 1
+defaults write -g InitialKeyRepeat -int 15
+defaults write -g ApplePressAndHoldEnabled -bool true
 
-# Keyboard shortcut Disable "Open man page in terminal" & "Search word in terminal man page index"
-defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 123 "<dict><key>enabled</key><false/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>22</integer><integer>262144</integer></array><key>type</key><string>standard</string></dict></dict>"
-defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 124 "<dict><key>enabled</key><false/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>22</integer><integer>262144</integer></array><key>type</key><string>standard</string></dict></dict>"
+# disable keyboard shortcuts
+# Show in Finder, Show info in Finder 
+defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 95 "<dict><key>enabled</key><false/></dict>"
+defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 96 "<dict><key>enabled</key><false/></dict>"
+# "Open man page in terminal" & "Search word in terminal man page index": hotkeys and disable terminal service
+defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 97 "<dict><key>enabled</key><false/></dict>"
+defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 98 "<dict><key>enabled</key><false/></dict>"
+defaults write pbs NSServicesStatus -dict-add "com.apple.Terminal - Open man Page in Terminal - openManPage" "<dict><key>enabled_context_menu</key><false/><key>enabled_services_menu</key><false/><key>presentation_modes</key><dict><key>ContextMenu</key><false/><key>ServicesMenu</key><false/></dict></dict>"
+defaults write pbs NSServicesStatus -dict-add "com.apple.Terminal - Search man Page Index in Terminal - searchManPages" "<dict><key>enabled_context_menu</key><false/><key>enabled_services_menu</key><false/><key>presentation_modes</key><dict><key>ContextMenu</key><false/><key>ServicesMenu</key><false/></dict></dict>"
+
+# Show Map
+defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 99 "<dict><key>enabled</key><false/></dict>"
+# "convert text to simplified chinese" and "convert text to traditional chinese"
+defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 175 "<dict><key>enabled</key><false/></dict>"
+defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 176 "<dict><key>enabled</key><false/></dict>"
+
+
 
 # https://apple.stackexchange.com/questions/405937/how-can-i-enable-keyboard-shortcut-preference-after-modifying-it-through-defaul
 /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u
 
-
-# Set language and text formats
-defaults write NSGlobalDomain AppleLanguages -array "en-US" "he-GB"
-defaults write NSGlobalDomain AppleLocale -string "en_US@currency=EUR"
-defaults write NSGlobalDomain AppleMeasurementUnits -string "Centimeters"
-defaults write NSGlobalDomain AppleMetricUnits -bool true
 
 # Show language menu in the top right corner of the boot screen
 sudo defaults write /Library/Preferences/com.apple.loginwindow showInputMenu -bool true
@@ -116,7 +150,7 @@ sudo chflags nohidden /Volumes
 defaults write com.apple.Finder AppleShowAllFiles true
 
 # Finder: show all filename extensions
-defaults write NSGlobalDomain AppleShowAllExtensions -bool true
+defaults write -g AppleShowAllExtensions -bool true
 
 # show path bar
 defaults write com.apple.finder ShowPathbar -bool true

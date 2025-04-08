@@ -8,7 +8,7 @@ if [[ ! $(command -v brew) ]]; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 
-if [[ ! $(command -v op) ]]; then
+if [[ ! $(command -v op) ]] || [[ ! $(command -v fish) ]]; then
     brew bundle --file=/dev/stdin <<EOF
 brew "fish"
 brew "git"
@@ -18,17 +18,21 @@ cask "1password-cli"
 cask "1password"
 EOF
 fi
-{{ end -}}
 
 # set fish as shell default shell, might need to logout -> login after
-echo $SHELL | grep -q -v zsh && chsh -s $(which fish) && echo "LOGOUT+LOGIN is required for zsh to work"
-! grep -q fish /etc/shells && echo $(which fish) | sudo tee -a /etc/shells
-# this replace the manual 
+echo $SHELL | grep -q -v fish && echo "fish is not the default shell, changing it"
+echo $SHELL | grep -q -v fish && chsh -s $(which fish) && echo "LOGOUT+LOGIN is required for fish to work"
+if ! grep -q fish /etc/shells; then
+  echo "fish is not the shells list, adding it"
+  echo $(which fish) | sudo tee -a /etc/shells
+fi
+# this replaces the manual 
 # "system settings -> Users and Groups -> unlock -> ctrl + click username -> advanced -> put full path of fish in \"Login shell\"
-sudo dscl . -read /Users/$USER UserShell | grep -q fish && sudo dscl . -create /Users/$USER UserShell $(which fish)
+dscl . -read /Users/$USER UserShell | grep -q -v fish && sudo dscl . -create /Users/$USER UserShell $(which fish)
 
+{{ end -}}
 
-if [[ ! $(op account list | grep samzilverberg) ]]; then
+if ! op account list | grep -q samzilverberg; then
   # TODO echo with RED color
   printf '
   =====================================================================
@@ -37,8 +41,6 @@ if [[ ! $(op account list | grep samzilverberg) ]]; then
   =====================================================================
   '
   exit 1
-fi
-
-if [[ $(op account list | grep samzilverberg) ]]; then
+else
   echo "logged in to 1pass, can continue"
 fi
