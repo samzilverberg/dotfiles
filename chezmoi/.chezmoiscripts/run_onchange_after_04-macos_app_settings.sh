@@ -11,9 +11,6 @@ echo "applying mac settings: app specific"
 # Close any open System Preferences panes to prevent conflicts with changes
 osascript -e 'tell application "System Preferences" to quit'
 
-# Ask for the administrator password upfront
-sudo -v
-
 # change to cmd+shift+q to quit for some apps (to avoid accidental cmd+q)
 defaults write app.zen-browser.zen NSUserKeyEquivalents -dict-add 'Quit Zen' '@$q'
 defaults write org.mozilla.firefox NSUserKeyEquivalents -dict-add 'Quit Firefox' '@$q'
@@ -63,3 +60,11 @@ addCustomMenuEntryIfNeeded "com.microsoft.VSCode"
 # might help avoid a total restart to get changes to affect immediately
 killall cfprefsd
 killall Finder
+
+# turn off "Show Spotlight search" spotlight shortcut
+defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 64 "<dict><key>enabled</key><false/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>49</integer><integer>1048576</integer></array><key>type</key><string>standard</string></dict></dict>"
+# turn off "Show Finder search window"
+defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 65 "<dict><key>enabled</key><false/></dict>"
+
+# run cmd to re-apply defaults so hoykeys will be updated
+/System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u
