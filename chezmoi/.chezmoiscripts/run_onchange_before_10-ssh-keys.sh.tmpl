@@ -7,13 +7,18 @@ echo "creating ssh keys if needed"
 
 {{ $ssh_dir := joinPath $.chezmoi.homeDir ".ssh" }}
 
+
+{{ $check_ssh_cmd := joinPath $.chezmoi.sourceDir "check_ssh_add" }}
+{{ $ssh_add_output := output "sh" $check_ssh_cmd }}
+{{ $ssh_list_empty := contains "The agent has no identities" $ssh_add_output }}
+
 # iterate over ssh_config data & create public/private keys if not present
 {{ range .ssh_config }}
 
 {{ $privatekey_filename := print .filename "_priv" }}
 {{ $privatekey_path := joinPath $ssh_dir $privatekey_filename}}
 {{ $createPrivate := false }}
-{{ if stat $privatekey_path }}
+{{ if and (not $ssh_list_empty) (stat $privatekey_path) }}
   echo "skip:   {{ $privatekey_path }}"
 {{else}}  
   echo "create: {{ $privatekey_path }}" 
@@ -33,16 +38,17 @@ echo "creating ssh keys if needed"
 
 {{ if or $createPrivate $createPublic }}
   {{ if $createPrivate }}
-    echo "{{ onepasswordRead .op_read_private_key .op_account }}" >"{{ $privatekey_path }}"
-    chmod 400 "{{ $privatekey_path }}"
+    echo "{{ onepasswordRead .op_read_private_key .op_account }}" >"{{ $privatekey_path }}_tmp"
+    chmod 400 "{{ $privatekey_path }}_tmp"
     # test that the key works, ATM only github url is tested, if need more add to ssh_config and adapt
-    ssh -i {{ $privatekey_path }} -T git@github.com &>/dev/null 2>$1
+    ssh -i {{ $privatekey_path }}_tmp -T git@github.com &> /dev/null
     EXITCODE=$?
     if [[ $EXITCODE -eq 1 ]]; then
-      echo "key works: {{ $privatekey_path }}"
+      mv -f {{ $privatekey_path }}_tmp {{ $privatekey_path }}
       ssh-add --apple-use-keychain {{ $privatekey_path }}
     else 
-      echo "key doesnt work: {{ $privatekey_path }}"
+      rm -f {{ $privatekey_path }}_tmp
+      echo "key doesnt work and not added to ssh-add: {{ $privatekey_path }}"
     fi
   {{ end }}
   {{ if $createPublic }}
