@@ -14,7 +14,7 @@ set -Ux BAT_THEME "Monokai Extended"
 
 alias gst="git status"
 alias gds="git diff --staged"
-#alias gd="git diff"
+alias gd.="git diff ."
 alias gcm="git checkout (git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')"
 alias gcb="git checkout -b"
 alias gl="git log"
@@ -24,6 +24,9 @@ alias dev="cd ~/dev"
 alias mono="cd ~/dev/mono/packages"
 alias pzs="cd ~/dev/payzen_server"
 alias servicing="cd ~/dev/payzen_servicing_server/packages"
+
+# krew path: plugin manager for kubectl
+set -q KREW_ROOT; and set -gx PATH $PATH $KREW_ROOT/.krew/bin; or set -gx PATH $PATH $HOME/.krew/bin
 
 function kcn -d "switch k8s namespace"
   kubectl config set-context --current --namespace "$argv"
@@ -193,11 +196,11 @@ end
 ssh-add -l | grep -q 'The agent has no identities' && ssh-add  --apple-load-keychain
 
 #zoxide is a smarter cd command, inspired by z and autojump. 
-zoxide init --cmd=cd fish | source
+command -qv zoxide && zoxide init --cmd=cd fish | source
 
 # helps gpg understand what the interactive terminal is so ncurses properly comes up for password prompts
 export GPG_TTY=$(tty)
 
 # https://starship.rs/config/
 # config is in ~/.config/starship.toml
-starship init fish | source
+command -qv starship && starship init fish | source
