@@ -66,5 +66,10 @@ defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 64 "<dic
 # turn off "Show Finder search window"
 defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 65 "<dict><key>enabled</key><false/></dict>"
 
+
+# iterm config location
+defaults write com.googlecode.iterm2.plist PrefsCustomFolder -string "~/dotfiles/chezmoi/dot_config/iterm2-config"
+defaults write com.googlecode.iterm2.plist LoadPrefsFromCustomFolder -bool true
+
 # run cmd to re-apply defaults so hoykeys will be updated
 /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u
