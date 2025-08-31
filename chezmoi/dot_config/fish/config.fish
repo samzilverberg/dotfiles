@@ -12,6 +12,8 @@ set -Ux AWS_ECR_REGISTRY "936143655872.dkr.ecr.us-east-1.amazonaws.com"
 set -Ux AWS_CDN_BUCKET "staging.static.payzen.com"
 set -Ux BAT_THEME "Monokai Extended"
 
+alias cdd="cdi"
+
 alias gst="git status"
 alias gds="git diff --staged"
 alias gd.="git diff ."
@@ -83,6 +85,7 @@ abbr -a nrb "npm run build"
 abbr -a nrt "npm t"
 abbr -a nrbt "npm run build && npm t"
 abbr -a nribt "npm ci && npm run build && npm t"
+abbr -a nibt "npm ci && npm run build && npm t"
 
 abbr -a npmv "npm version"
 
@@ -91,6 +94,7 @@ abbr -a upzcli "npm i -g @payzen/payzen-cli"
 abbr -a pzp "pz publish"
 abbr -a pzpp "pz publish -r patch"
 abbr -a pzpm "pz publish -r minor"
+abbr -a pzpmj "pz publish -r major"
 abbr -a pzpb "pz publish -r beta -f"
 abbr -a pzd "pz deploy"
 
@@ -204,3 +208,6 @@ export GPG_TTY=$(tty)
 # https://starship.rs/config/
 # config is in ~/.config/starship.toml
 command -qv starship && starship init fish | source
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/opt/homebrew/share/google-cloud-sdk/path.fish.inc' ]; . '/opt/homebrew/share/google-cloud-sdk/path.fish.inc'; end
