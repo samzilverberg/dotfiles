@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# all the brew formulas&cask that i use
 {{ if eq .chezmoi.os "darwin" -}}
+# installs the brew formulas&cask that i use and more
 
 brew bundle --file=/dev/stdin <<EOF
 brew "git"

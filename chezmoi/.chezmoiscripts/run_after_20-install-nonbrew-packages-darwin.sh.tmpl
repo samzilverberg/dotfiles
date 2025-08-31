@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+{{ if eq .chezmoi.os "darwin" -}}
+# installs packages that are not available via brew
+if [[ ! $(command -v yai) ]]; then
+    curl -sS https://raw.githubusercontent.com/ekkinox/yai/main/install.sh | bash
+fi
+{{ end -}}
