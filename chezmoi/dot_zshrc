@@ -71,3 +71,13 @@ echo $PATH | grep -q "/usr/local/sbin" || export PATH="/usr/local/sbin:$PATH"
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
 export SDKMAN_DIR="$HOME/.sdkman"
 [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+
+. "$HOME/.local/bin/env"
+
+export AWS_ECR_REGISTRY="936143655872.dkr.ecr.us-east-1.amazonaws.com"
+
+alias claude-mem='/Users/samz/.bun/bin/bun "/Users/samz/.claude/plugins/cache/thedotmack/claude-mem/11.0.1/scripts/worker-service.cjs"'
+
+if command -v mise &>/dev/null; then
+  mise activate zsh | source
+fi

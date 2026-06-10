@@ -8,9 +8,13 @@ end
 
 
 set -Ux EZA_COLORS "da=1;34:di=1;34"
-set -Ux AWS_ECR_REGISTRY "936143655872.dkr.ecr.us-east-1.amazonaws.com"
-set -Ux AWS_CDN_BUCKET "staging.static.payzen.com"
+set -U -x AWS_ECR_REGISTRY "936143655872.dkr.ecr.us-east-1.amazonaws.com"
+set -U -x AWS_CDN_BUCKET "staging.static.payzen.com"
 set -Ux BAT_THEME "Monokai Extended"
+
+alias vi="nvim"
+alias vim="nvim"
+set -gx EDITOR nvim
 
 alias cdd="cdi"
 
@@ -79,14 +83,23 @@ abbr -a gpud "git push -d origin"
 abbr -a kc kubectl
 alias kc="kubectl"
 
-abbr -a nrtit "npm t ./test/it"
-abbr -a nrte "npm t ./test/e2e"
-abbr -a nrb "npm run build"
-abbr -a nrt "npm t"
-abbr -a nrbt "npm run build && npm t"
-abbr -a nribt "npm ci && npm run build && npm t"
-abbr -a nibt "npm ci && npm run build && npm t"
+# https://github.com/ryoppippi/fish-na
+# if interactively writing npm, will correct to the package manager detected in PWD
+abbr -a npm -f _na
+abbr -a pnpm -f _na
+alias npmm="npm" #in case you actually want to force run npm
+alias pnpmm="pnpm" #in case you actually want to force run pnpm
 
+# ni: fisher alternatitve for @antfu/ni, detects package manager to use
+# https://github.com/Karibash/ni.fish
+# $ fisher install Karibash/ni.fish
+abbr -a nrtit "ni run test ./test/it"
+abbr -a nrte "ni run test ./test/e2e"
+abbr -a nrb "ni run build"
+abbr -a nrt "ni run test"
+abbr -a nrbt "ni run build && ni run test"
+abbr -a nribt "ni ci && ni run build && ni run test"
+abbr -a nibt "ni ci && ni run build && ni run test"
 abbr -a npmv "npm version"
 
 abbr -a upzcli "npm i -g @payzen/payzen-cli"
@@ -95,7 +108,7 @@ abbr -a pzp "pz publish"
 abbr -a pzpp "pz publish -r patch"
 abbr -a pzpm "pz publish -r minor"
 abbr -a pzpmj "pz publish -r major"
-abbr -a pzpb "pz publish -r beta -f"
+abbr -a pzpb "pz publish -r beta"
 abbr -a pzd "pz deploy"
 
 # the silver searcher, ag, has no config, need to alias common options
@@ -197,17 +210,53 @@ end
 # 
 # __check_buildkit_flag
 
-ssh-add -l | grep -q 'The agent has no identities' && ssh-add  --apple-load-keychain
+# mise: update env on prompt render only (after cd), not on every PWD-variable touch.
+# keeps auto directory-switching, drops the redundant per-startup hook-env calls.
+set -gx mise_fish_mode disable_arrow
 
-#zoxide is a smarter cd command, inspired by z and autojump. 
-command -qv zoxide && zoxide init --cmd=cd fish | source
+# cache a tool's init script; regenerate only when the binary is newer than the cache.
+# avoids spawning the tool (slow) on every shell start.
+function __cached_init --description 'cache tool init script; regen when binary newer'
+  set -l name $argv[1]
+  set -l cmd $argv[2..-1]
+  set -l binpath (command -v $cmd[1])
+  test -z "$binpath"; and return
+  set -l cachefile ~/.cache/fish/$name.init.fish
+  if not test -f $cachefile; or test $binpath -nt $cachefile
+    $cmd >$cachefile
+  end
+  source $cachefile
+end
+
+# load ssh keys from macOS keychain once at login, not on every interactive shell
+if status is-login
+  ssh-add -l 2>/dev/null | grep -q 'The agent has no identities' && ssh-add --apple-load-keychain 2>/dev/null
+end
+
+#zoxide is a smarter cd command, inspired by z and autojump.
+__cached_init zoxide zoxide init --cmd=cd fish
 
 # helps gpg understand what the interactive terminal is so ncurses properly comes up for password prompts
 export GPG_TTY=$(tty)
 
 # https://starship.rs/config/
 # config is in ~/.config/starship.toml
-command -qv starship && starship init fish | source
+__cached_init starship starship init fish --print-full-init
 
-# The next line updates PATH for the Google Cloud SDK.
-if [ -f '/opt/homebrew/share/google-cloud-sdk/path.fish.inc' ]; . '/opt/homebrew/share/google-cloud-sdk/path.fish.inc'; end
+# Google Cloud SDK: add bin dir directly instead of sourcing the slow path.fish.inc
+test -d /opt/homebrew/share/google-cloud-sdk/bin; and fish_add_path /opt/homebrew/share/google-cloud-sdk/bin
+
+# pnpm
+set -gx PNPM_HOME "/Users/samz/Library/pnpm"
+if not string match -q -- $PNPM_HOME $PATH
+  set -gx PATH "$PNPM_HOME" $PATH
+end
+# pnpm end
+
+# github token for gh cli — read from macOS keychain (no secret in this file)
+# store/update: security add-generic-password -U -a $USER -s GITHUB_WORKFLOW_TOKEN -w <token>
+set -gx GITHUB_WORKFLOW_TOKEN (security find-generic-password -w -s GITHUB_WORKFLOW_TOKEN 2>/dev/null)
+
+# bun
+set --export BUN_INSTALL "$HOME/.bun"
+set --export PATH $BUN_INSTALL/bin $PATH
