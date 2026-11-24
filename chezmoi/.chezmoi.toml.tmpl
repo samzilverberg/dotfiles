@@ -24,6 +24,9 @@
 
 sourceDir = "~/dotfiles"
 mode = "symlink"
+# dirs chezmoi creates/manages are 700, generated files 600 (matches what macOS apps
+# create under ~ and keeps chezmoi from loosening ~/.config etc. to 755)
+umask = 0o077
 
 [data]
     email = "samzilverberg@gmail.com"
