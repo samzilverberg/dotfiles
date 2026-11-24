@@ -32,18 +32,37 @@ function _na_get_package_manager_name --argument-names path
     if test -n "$package_json_path"
         set -l valid npm yarn pnpm bun
         set -l name
-
-        # 1. top-level string form: "packageManager": "pnpm@10.x"
-        #    regex requires the opening quote after the colon, so the
-        #    devEngines `"packageManager": {` line never matches.
-        set -l s (string match -rg '"packageManager"\s*:\s*"([^"@]+)' < $package_json_path)
-        if test -n "$s"
-            set name $s[1]
+        if type -q jq
+            # Structure-aware: top-level string "packageManager": "pnpm@10.x"
+            # falls back to devEngines.packageManager.name (object or array
+            # form). jq scopes to the real keys, so the package's own top-level
+            # "name" is never mistaken for the package-manager name.
+            set name (jq -r '
+                if (.packageManager | type) == "string" then
+                    (.packageManager | split("@")[0])
+                elif (.devEngines.packageManager | type) == "object" then
+                    .devEngines.packageManager.name
+                elif (.devEngines.packageManager | type) == "array" then
+                    .devEngines.packageManager[0].name
+                else empty end' $package_json_path 2>/dev/null)
         else
-            # 2. devEngines.packageManager.name form (no top-level string)
-            set -l d (string match -rg '"name"\s*:\s*"([^"]+)"' < $package_json_path)
-            if test -n "$d"
-                set name $d[1]
+            # Fallback (no jq). 1. top-level string form: the regex requires the
+            # opening quote after the colon, so the devEngines
+            # `"packageManager": {` line never matches.
+            set -l s (string match -rg '"packageManager"\s*:\s*"([^"@]+)' < $package_json_path)
+            if test -n "$s"
+                set name $s[1]
+            else
+                # 2. devEngines.packageManager.name form: scope to the block
+                #    after `"devEngines"` so the top-level package "name" is
+                #    skipped. Find the first "name" appearing after devEngines.
+                set -l after (string match -rg '"devEngines"\s*:(.*)' (string collect < $package_json_path | string replace -a \n ' '))
+                if test -n "$after"
+                    set -l d (string match -rg '"name"\s*:\s*"([^"]+)"' -- $after[1])
+                    if test -n "$d"
+                        set name $d[1]
+                    end
+                end
             end
         end
 
