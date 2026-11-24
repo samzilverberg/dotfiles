@@ -30,7 +30,7 @@ chezmoi/                    chezmoi source dir (.chezmoiroot)
   .chezmoiignore            OS + profile gating
   .chezmoiscripts/          bootstrap, packages, gpg import, fisher, cleanup; darwin/ + linux/ only run there
   dot_config/shell/         shared shell layer (below)
-  dot_config/fish/ ...      everything else maps 1:1 to $HOME
+  dot_config/private_fish/  …         everything else maps 1:1 to $HOME
 ```
 
 ## Profiles
