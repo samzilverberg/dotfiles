@@ -86,9 +86,10 @@ defaults write com.apple.AppleMultitouchTrackpad TrackpadTwoFingerFromRightEdgeS
 # Disable the "Are you sure you want to open this application?" dialog.
 defaults write com.apple.LaunchServices LSQuarantine -bool false
 
-# Fast keyboard repeat. Units of 15ms: KeyRepeat 2 (30ms) and InitialKeyRepeat 15 (225ms) are the
-# fastest the System Settings sliders go (KeyRepeat 1 felt too fast). Takes effect after re-login.
-defaults write -g KeyRepeat -int 2
+# Fast keyboard repeat. Units of 1/60 s: KeyRepeat 3 = 50ms between repeats (1 and 2 felt too fast;
+# the fastest System Settings slider step is 2), InitialKeyRepeat 15 = 250ms delay (shortest slider step).
+# Applied live by `activateSettings -u` below; check: ioreg -n IOHIDSystem -r -l | grep HIDKeyRepeat
+defaults write -g KeyRepeat -int 3
 defaults write -g InitialKeyRepeat -int 15
 # press-and-hold shows the accent picker (and then doesn't repeat letters in Cocoa apps)
 defaults write -g ApplePressAndHoldEnabled -bool true
