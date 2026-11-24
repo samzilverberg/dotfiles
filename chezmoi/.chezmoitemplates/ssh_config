@@ -12,7 +12,7 @@ Host *
   # keys are served by the 1Password SSH agent (no private keys on disk);
   # which items it offers: ~/.config/1Password/ssh/agent.toml
 {{- if eq .chezmoi.os "darwin" }}
-  IdentityAgent "~/Library/Group Containers/2BUAA49233.com.1password/t/agent.sock"
+  IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
 {{- else }}
   IdentityAgent ~/.1password/agent.sock
 {{- end }}

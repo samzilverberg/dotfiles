@@ -4,3 +4,11 @@
 
 [[ssh-keys]]
 vault = "dotfiles"
+{{- if has "payzen" .profiles }}
+
+# payzen profile: work key, kept in the PayZen account's Employee vault
+[[ssh-keys]]
+item = "ssh-payzen-dev docu"
+vault = "Employee"
+account = "PayZen"
+{{- end }}
