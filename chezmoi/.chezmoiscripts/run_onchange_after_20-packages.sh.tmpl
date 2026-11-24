@@ -25,6 +25,10 @@ cask {{ . | quote }}
 {{- end }}{{ end }}
 EOF
 
+# zsh compinit refuses group-writable completion dirs (aborts => no completions at all);
+# Homebrew creates $HOMEBREW_PREFIX/share as 775
+chmod go-w "$HOMEBREW_PREFIX/share" "$HOMEBREW_PREFIX/share/zsh" "$HOMEBREW_PREFIX/share/zsh/site-functions" 2>/dev/null || true
+
 # install.sh put chezmoi in ~/.local/bin (first on PATH); once brew's exists, drop the copy so it
 # doesn't shadow brew's (and never gets upgraded)
 if [ -x "$HOME/.local/bin/chezmoi" ] && [ -x "$HOMEBREW_PREFIX/bin/chezmoi" ]; then
