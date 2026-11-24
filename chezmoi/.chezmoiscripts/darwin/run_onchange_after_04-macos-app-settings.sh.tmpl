@@ -8,8 +8,8 @@ fi
 # app specific mac settings
 
 echo "applying mac settings: app specific"
-# Close any open System Preferences panes to prevent conflicts with changes
-osascript -e 'tell application "System Preferences" to quit'
+# Close System Settings so it doesn't override the settings we're about to change
+osascript -e 'if application id "com.apple.systempreferences" is running then tell application id "com.apple.systempreferences" to quit'
 
 # change to cmd+shift+q to quit for some apps (to avoid accidental cmd+q)
 defaults write app.zen-browser.zen NSUserKeyEquivalents -dict-add 'Quit Zen' '@$q'
@@ -58,9 +58,7 @@ addCustomMenuEntryIfNeeded "org.mozilla.firefox"
 addCustomMenuEntryIfNeeded "com.google.Chrome"
 addCustomMenuEntryIfNeeded "com.microsoft.VSCode"
 
-# might help avoid a total restart to get changes to affect immediately
-killall cfprefsd
-killall Finder
+# NSUserKeyEquivalents apply when each app is restarted
 
 # turn off "Show Spotlight search" spotlight shortcut
 defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 64 "<dict><key>enabled</key><false/><key>value</key><dict><key>parameters</key><array><integer>65535</integer><integer>49</integer><integer>1048576</integer></array><key>type</key><string>standard</string></dict></dict>"

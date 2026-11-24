@@ -1,0 +1,13 @@
+#!/bin/sh
+# mass rename files whose path matches <lookup> (regex, perl syntax): copy-pasta-file <lookup> <replace>
+# paths with spaces are fine; <replace> may contain `/` (creates missing dirs)
+set -eu
+[ $# -eq 2 ] || { echo "usage: copy-pasta-file <lookup> <replace>" >&2; exit 1; }
+ag --ignore-dir node_modules --ignore-dir build --ignore tsconfig.build.tsbuildinfo -l -g "$1" \
+  | while IFS= read -r f; do
+    # shellcheck disable=SC2016 # $ENV{...} is perl, not shell
+    new=$(printf '%s\n' "$f" | LOOKUP=$1 REPLACE=$2 perl -pe 's/$ENV{LOOKUP}/$ENV{REPLACE}/g')
+    [ "$f" = "$new" ] && continue
+    mkdir -p "$(dirname "$new")"
+    mv "$f" "$new"
+  done

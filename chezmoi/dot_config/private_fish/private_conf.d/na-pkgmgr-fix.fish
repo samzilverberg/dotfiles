@@ -1,4 +1,4 @@
-# Fix for `na`/`ni` (Karibash/ni.fish via fisher) package-manager detection.
+# Fix for `na` (ryoppippi/fish-na via fisher) package-manager detection.
 #
 # Bug: _na_get_package_manager_name in functions/_na.fish uses
 #   `string match --entire -r "packageManager"` which grabs the FIRST line

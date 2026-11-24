@@ -5,33 +5,45 @@
 # https://github.com/zsh-users/zsh-syntax-highlighting/issues/295#issuecomment-214581607
 zstyle ':bracketed-paste-magic' active-widgets '.self-*'
 
-setopt extended_history
 HISTFILE="$HOME/.histfile"
 HISTSIZE=20000
 SAVEHIST=20000
+setopt extended_history share_history hist_ignore_dups hist_expire_dups_first hist_verify
+setopt auto_cd interactive_comments
 
-# Antigen (oh-my-zsh + plugins, see ~/.zshrc_antigen)
-for _antigen in \
-  /opt/homebrew/share/antigen/antigen.zsh \
-  /usr/local/share/antigen/antigen.zsh \
-  /usr/share/zsh-antigen/antigen.zsh \
-  /usr/share/zsh/share/antigen.zsh; do
-  if [ -f "$_antigen" ]; then
-    source "$_antigen"
-    antigen init ~/.zshrc_antigen
-    break
-  fi
+# emacs keys; up/down search history by the typed prefix
+bindkey -e
+autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+bindkey '^[[A' up-line-or-beginning-search '^[OA' up-line-or-beginning-search
+bindkey '^[[B' down-line-or-beginning-search '^[OB' down-line-or-beginning-search
+
+# completions: brew's site-functions (+ zsh-completions) before compinit
+for _d in /opt/homebrew/share/zsh-completions /opt/homebrew/share/zsh/site-functions \
+  /usr/local/share/zsh-completions /usr/local/share/zsh/site-functions; do
+  [ -d "$_d" ] && fpath=("$_d" $fpath)
 done
-unset _antigen
+unset _d
+autoload -Uz compinit && compinit -C
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+zstyle ':completion:*' menu select
 
 # shared aliases (same as fish) + profile aliases
 [ -f "$HOME/.config/shell/load-interactive.sh" ] && . "$HOME/.config/shell/load-interactive.sh"
 
-# enable zsh tab completions engine
-autoload -Uz compinit && compinit -C
-
 command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init zsh --cmd cd)"
 command -v mise >/dev/null 2>&1 && eval "$(mise activate zsh)"
+command -v fzf >/dev/null 2>&1 && eval "$(fzf --zsh 2>/dev/null)" # ctrl-r / ctrl-t (fzf >= 0.48)
+command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
+
+# plugins from the package manager (brew / apt / dnf); syntax-highlighting must come last
+for _p in zsh-autosuggestions/zsh-autosuggestions.zsh zsh-syntax-highlighting/zsh-syntax-highlighting.zsh; do
+  for _b in /opt/homebrew/share /usr/local/share /usr/share /usr/share/zsh/plugins; do
+    [ -r "$_b/$_p" ] && { source "$_b/$_p"; break; }
+  done
+done
+unset _p _b
 
 # legacy version managers, only if installed
 command -v fnm >/dev/null 2>&1 && { eval "$(fnm env)"; alias nvm="fnm"; }

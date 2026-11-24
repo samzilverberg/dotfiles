@@ -6,3 +6,6 @@ export HOMEBREW_CELLAR="/opt/homebrew/Cellar"
 export HOMEBREW_REPOSITORY="/opt/homebrew"
 
 export PNPM_HOME="$HOME/Library/pnpm"
+
+# LC_ALL only on macOS: Linux boxes often lack the en_US.UTF-8 locale (setlocale warnings)
+export LC_ALL="en_US.UTF-8"

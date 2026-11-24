@@ -12,9 +12,13 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/samzilverberg/dotfiles/mas
 Installs chezmoi, clones this repo to `~/dotfiles` and applies it. It asks which **profiles** the
 machine gets (e.g. `payzen` on the work laptop, empty for none). The first apply stops once and asks
 you to sign in to 1Password and enable **Settings → Developer → CLI integration** and **SSH agent**,
-then run `chezmoi apply` again.
+then run apply again with the command it prints (chezmoi is in `~/.local/bin`, not on PATH yet).
+The macOS settings script may ask for your password once (sudo).
 
+Linux: Ubuntu ≥ 24.04 or Fedora (the fish config needs fish ≥ 3.6).
 Headless Linux without 1Password: `DOTFILES_SKIP_1PASSWORD=1 DOTFILES_PROFILES=none` before the command.
+There is no gpg key and no 1Password SSH agent there, so put local overrides in `~/.gitconfig.local`
+(e.g. `[commit] gpgsign = false`); ssh then uses `$SSH_AUTH_SOCK` / keys as usual.
 
 ## Layout
 
@@ -28,7 +32,7 @@ chezmoi/                    chezmoi source dir (.chezmoiroot)
     profiles.yaml           profile catalog (what each profile owns)
     onepassword_config.toml 1Password account / vault / item names (no secret values)
   .chezmoiignore            OS + profile gating
-  .chezmoiscripts/          bootstrap, packages, gpg import, fisher, cleanup; darwin/ + linux/ only run there
+  .chezmoiscripts/          bootstrap, packages, gpg import, fisher, cleanup; darwin/ only runs there
   dot_config/shell/         shared shell layer (below)
   dot_config/private_fish/  …         everything else maps 1:1 to $HOME
 ```
@@ -45,8 +49,10 @@ A profile owns:
 - extra target paths listed in `.chezmoidata/profiles.yaml` (e.g. `~/.aws`)
 - packages under `packages.profiles.<name>` in `.chezmoidata/packages.yaml`
 
-On machines without the profile, all of it is skipped. To add a profile: add it to `profiles.yaml`,
-create `chezmoi/dot_config/shell/profile-<name>/`, done.
+On machines without the profile, all of it is skipped; dropping a profile removes its
+`~/.config/shell/profile-<name>/` on the next apply (other targets are left alone). An unknown profile
+name fails the apply. To add a profile: add it to `profiles.yaml`, create
+`chezmoi/dot_config/shell/profile-<name>/`, done.
 
 ## Shared shell layer (fish, zsh, bash, agents)
 
@@ -54,9 +60,9 @@ fish is the daily shell, but apps and AI agents often spawn zsh/bash. They all l
 
 | file | what | loaded by |
 |---|---|---|
-| `env.sh`, `env.<os>.sh` | `export NAME="value"` lines only (valid fish *and* sh) | every shell, incl. non-interactive (`zsh -c`) |
+| `env.sh`, `env.<os>.sh` | `export NAME="value"` lines only (valid fish *and* sh) | once per session (exported, inherited by child shells, incl. `zsh -c` / `bash -c`) |
 | `paths`, `paths.<os>` | PATH dirs, one per line, first wins | every shell |
-| `bin/` | portable scripts (kcn, klogs, ...) — work everywhere, incl. agents | on PATH |
+| `bin/` | portable scripts (kcn, klogs, ...) — work everywhere, incl. agents | on PATH (`exact_`: removed scripts disappear) |
 | `aliases.sh` | `alias x='...'` lines only (valid fish *and* sh) | interactive shells |
 
 Wiring: zsh `~/.zshenv` (+ `~/.zprofile`, `~/.zshrc`), bash `~/.bashrc`, fish `conf.d/00-shared-shell.fish`.
@@ -65,7 +71,8 @@ Shell-specific extras stay in `config.fish` / `.zshrc`. Rule of thumb: logic →
 ## Secrets (1Password, personal account, vault `dotfiles`)
 
 Nothing secret is committed. Values come from 1Password in two ways, both designed so that a normal
-`chezmoi apply` **never calls 1Password** (no Touch ID prompts):
+`chezmoi apply` **never reads a secret** (no Touch ID prompts; bootstrap only checks the CLI is
+signed in with `op account list`):
 
 - `create_` templates: written once when the file is missing, never re-rendered.
   To refresh one: delete the target file and `chezmoi apply`.
@@ -86,8 +93,12 @@ The GitHub workflow token (payzen) stays in the macOS keychain:
 - `mode = "symlink"`: plain files in `$HOME` are symlinks into this repo, so edit them in place and commit.
   Templates, `private_`, `executable_` and `create_` files are copies: edit with `chezmoi edit <file>`
   (or edit the source and `chezmoi apply`).
-- Removing a file from the repo leaves a dangling symlink; the `90-prune` script removes those on the next apply.
-- Packages: edit `.chezmoidata/packages.yaml`, `chezmoi apply` (nothing is ever uninstalled automatically).
+- Removing a symlinked file from the repo leaves a dangling symlink; the `90-prune` script removes those
+  on the next apply. Copied files are not pruned (except in `exact_` dirs): delete those by hand.
+- Packages: edit `.chezmoidata/packages.yaml`, `chezmoi apply`. Installs what's missing after the
+  dotfiles are written; never upgrades (`brew upgrade`) or uninstalls.
+- Machine-local git settings: `git config -f ~/.gitconfig.local ...` (`git config --global` would write
+  into this public repo through the `~/.gitconfig` symlink).
 - iTerm2 reads/writes its prefs directly in `chezmoi/dot_config/iterm2-config` (never deployed).
 - `chezmoi diff` excludes scripts. To re-run all scripts:
   `chezmoi state delete-bucket --bucket=entryState && chezmoi state delete-bucket --bucket=scriptState`

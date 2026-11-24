@@ -1,14 +1,19 @@
 # fish config. Shared env / PATH / aliases (also used by zsh & bash) come from ~/.config/shell,
-# loaded by conf.d/00-shared-shell.fish before this file. Profile extras: ~/.config/shell/profile-*/
+# loaded by conf.d/00-shared-shell.fish before this file (incl. mise settings).
+# Profile extras: ~/.config/shell/profile-*/
 
 # cancel the fish greeting
 function fish_greeting
 end
 
+# everything below is for interactive shells only: scripts / agents running `fish -c`
+# must get plain `cat`, `npm` etc.
+status is-interactive; or return
+
 if not command -q bat; and command -q batcat # Debian/Ubuntu name
     alias bat=batcat
 end
-if command -q bat
+if command -q bat; or command -q batcat
     function cat --wraps=bat --description 'bat wrapper for cat'
         bat $argv
     end
@@ -18,7 +23,7 @@ alias gcm="git checkout (git symbolic-ref refs/remotes/origin/HEAD | sed 's@^ref
 
 # abbreviations: after pressing enter or space it expands to the full text of the abbr
 # https://fishshell.com/docs/current/interactive.html#abbreviations
-abbr -a gd git diff
+# (gd is a shared alias in ~/.config/shell/aliases.sh)
 abbr -a gf git fetch
 abbr -a gp "git pull --prune"
 abbr -a gpu "git push -u origin (git branch --show-current)"
@@ -42,37 +47,38 @@ abbr -a nribt "ni ci && ni run build && ni run test"
 abbr -a nibt "ni ci && ni run build && ni run test"
 abbr -a npmv "npm version"
 
-# mise: update env on prompt render only (after cd), not on every PWD-variable touch.
-# keeps auto directory-switching, drops the redundant per-startup hook-env calls.
-set -gx mise_fish_mode disable_arrow
-
-# cache a tool's init script; regenerate only when the binary is newer than the cache.
-# avoids spawning the tool (slow) on every shell start.
-function __cached_init --description 'cache tool init script; regen when binary newer'
+# cache a tool's init script (spawning the tool on every shell start is slow).
+# The cache name includes the resolved binary path, which contains the version on brew,
+# so an upgrade regenerates it. Never cache output that embeds PATH (e.g. `mise activate`).
+function __cached_init --description 'cache tool init script per binary version'
     set -l name $argv[1]
     set -l cmd $argv[2..-1]
     set -l binpath (command -v $cmd[1])
     test -z "$binpath"; and return
-    set -l cachefile ~/.cache/fish/$name.init.fish
-    if not test -f $cachefile; or test $binpath -nt $cachefile
-        mkdir -p (path dirname $cachefile)
-        $cmd >$cachefile
+    set -l real (path resolve $binpath)
+    set -l cachefile ~/.cache/fish/$name.(string replace -ra '[^\w.-]' _ -- $real).init.fish
+    if not test -s $cachefile
+        mkdir -p ~/.cache/fish
+        set -l stale ~/.cache/fish/$name.*.init.fish # `set` allows a glob with no matches
+        rm -f $stale ~/.cache/fish/$name.init.fish
+        $cmd >$cachefile.tmp; and mv $cachefile.tmp $cachefile; or begin
+            rm -f $cachefile.tmp
+            return 1
+        end
     end
     source $cachefile
 end
 
-if status is-interactive
-    # zoxide is a smarter cd command, inspired by z and autojump.
-    __cached_init zoxide zoxide init --cmd=cd fish
+# zoxide is a smarter cd command, inspired by z and autojump.
+__cached_init zoxide zoxide init --cmd=cd fish
 
-    # mise: brew's fish package auto-activates it (vendor_conf.d); elsewhere activate here
-    if not functions -q __mise_env_eval; and command -q mise
-        __cached_init mise mise activate fish
-    end
-
-    # helps gpg understand what the interactive terminal is so ncurses properly comes up for password prompts
-    set -gx GPG_TTY (tty)
-
-    # https://starship.rs/config/  config is in ~/.config/starship.toml
-    __cached_init starship starship init fish --print-full-init
+# mise: brew's fish package auto-activates it (vendor_conf.d); elsewhere activate here (uncached)
+if not functions -q __mise_env_eval; and command -q mise
+    mise activate fish | source
 end
+
+# helps gpg understand what the interactive terminal is so ncurses properly comes up for password prompts
+set -gx GPG_TTY (tty)
+
+# https://starship.rs/config/  config is in ~/.config/starship.toml
+__cached_init starship starship init fish --print-full-init

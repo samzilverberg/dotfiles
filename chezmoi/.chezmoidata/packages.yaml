@@ -1,4 +1,4 @@
-# Packages installed by .chezmoiscripts/run_onchange_before_20-packages.sh.tmpl
+# Packages installed by .chezmoiscripts/run_onchange_after_20-packages.sh.tmpl
 # (re-runs whenever the rendered list changes). Nothing is ever uninstalled automatically.
 packages:
   darwin:
@@ -14,10 +14,13 @@ packages:
       - fish
       - fisher
       - zsh
-      - antigen
+      - zsh-completions
+      - zsh-autosuggestions
+      - zsh-syntax-highlighting
       - starship
       - zoxide
       - fzf
+      - fd             # fzf.fish directory search
       - mise
       - bat
       - eza
@@ -77,11 +80,14 @@ packages:
     - openssh-client
     - fish
     - zsh
-    - zsh-antigen
+    - zsh-autosuggestions
+    - zsh-syntax-highlighting
     - jq
     - fzf
+    - fd-find        # binary is `fdfind` on Debian/Ubuntu, packages script links ~/.local/bin/fd
     - zoxide
     - bat            # binary is `batcat` on Debian/Ubuntu, fish config aliases it
+    - gh
     - silversearcher-ag
     - neovim
     - httpie
@@ -94,10 +100,14 @@ packages:
     - openssh-clients
     - fish
     - zsh
+    - zsh-autosuggestions
+    - zsh-syntax-highlighting
     - jq
     - fzf
+    - fd-find
     - zoxide
     - bat
+    - gh
     - the_silver_searcher
     - neovim
     - httpie

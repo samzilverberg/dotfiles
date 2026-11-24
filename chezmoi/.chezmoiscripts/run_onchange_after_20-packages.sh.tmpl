@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Installs packages from .chezmoidata/packages.yaml (base + this machine's profiles: {{ .profiles | join ", " }}).
 # run_onchange: re-runs whenever the rendered package list changes. Never uninstalls anything.
+# after_: dotfiles are written first, so one failing package can't block them (bootstrap already
+# installed what the apply itself needs). A failure still exits non-zero, so the next apply retries.
 set -euo pipefail
 
 {{ if eq .chezmoi.os "darwin" -}}
@@ -22,6 +24,13 @@ brew {{ . | quote }}
 cask {{ . | quote }}
 {{- end }}{{ end }}
 EOF
+
+# install.sh put chezmoi in ~/.local/bin (first on PATH); once brew's exists, drop the copy so it
+# doesn't shadow brew's (and never gets upgraded)
+if [ -x "$HOME/.local/bin/chezmoi" ] && [ -x "$HOMEBREW_PREFIX/bin/chezmoi" ]; then
+  rm -f "$HOME/.local/bin/chezmoi"
+  echo "removed ~/.local/bin/chezmoi (brew's chezmoi is used now)"
+fi
 {{- else if eq .chezmoi.os "linux" }}
 SUDO=""
 [ "$(id -u)" -ne 0 ] && SUDO="sudo"
@@ -35,6 +44,11 @@ fi
 
 mkdir -p "$HOME/.local/bin"
 export PATH="$HOME/.local/bin:$PATH"
+
+# Debian/Ubuntu install fd as `fdfind`; tools (fzf.fish) expect `fd`
+if ! command -v fd >/dev/null 2>&1 && command -v fdfind >/dev/null 2>&1; then
+  ln -sf "$(command -v fdfind)" "$HOME/.local/bin/fd"
+fi
 {{- range .packages.linux_installers }}
 {{-   if eq . "starship" }}
 command -v starship >/dev/null 2>&1 || curl -fsSL https://starship.rs/install.sh | sh -s -- -y -b "$HOME/.local/bin"

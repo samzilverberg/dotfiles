@@ -1,0 +1,7 @@
+# gpg is only used for commit signing (ssh goes through the 1Password agent)
+default-cache-ttl 86400
+max-cache-ttl 86400
+{{- if eq .chezmoi.os "darwin" }}
+# GUI passphrase prompt: works for commits from IDEs / agents without a terminal
+pinentry-program {{ if eq .chezmoi.arch "arm64" }}/opt/homebrew{{ else }}/usr/local{{ end }}/bin/pinentry-mac
+{{- end }}

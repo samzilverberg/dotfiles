@@ -1,14 +1,25 @@
 # Loads the shared shell layer (~/.config/shell, also used by zsh/bash) into fish.
 # Runs for every fish, incl. non-interactive. POSIX twin: ~/.config/shell/load-env.sh
 
+# mise (must be set before brew's vendor_conf.d/mise-activate.fish, which sorts after this file):
+# - interactive: update env on prompt render only (after cd), not on every PWD change
+# - non-interactive (`fish -c`, scripts, agents): no activation; the shims dir on PATH is enough
+set -g mise_fish_mode disable_arrow
+status is-interactive; or set -g MISE_FISH_AUTO_ACTIVATE 0
+
 set -l shell_dir ~/.config/shell
 set -l os (uname -s | string lower)
 
-for f in $shell_dir/env.sh $shell_dir/env.$os.sh $shell_dir/profile-*/env.sh $shell_dir/profile-*/env.$os.sh
-    test -f $f; and source $f
+# env vars: once per session; child shells inherit the exported values
+if not set -q DOTFILES_ENV_LOADED
+    for f in $shell_dir/env.sh $shell_dir/env.$os.sh $shell_dir/profile-*/env.sh $shell_dir/profile-*/env.$os.sh
+        test -f $f; and source $f
+    end
+    set -gx DOTFILES_ENV_LOADED 1
 end
 
-# PATH: collect dirs in priority order, prepend in reverse so the first listed ends up first
+# PATH (every shell: login shells / path_helper may have reordered it):
+# collect dirs in priority order, prepend in reverse so the first listed ends up first
 set -l dirs
 for f in $shell_dir/paths $shell_dir/paths.$os
     test -f $f; or continue

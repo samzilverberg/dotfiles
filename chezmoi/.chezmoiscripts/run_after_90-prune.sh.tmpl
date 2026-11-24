@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Cleanup chezmoi itself doesn't do in this setup:
+# 1. symlink mode: when a file is removed from the source dir its target symlink is left dangling.
+#    Remove dangling symlinks that point into the source dir.
+#    (copied files, e.g. scripts in ~/.config/shell/bin, are handled by exact_ dirs instead)
+# 2. a profile dropped from this machine: its ~/.config/shell/profile-<name>/ layer is ignored by
+#    chezmoi but would still be loaded by every shell (profile-* glob), so remove it.
+#    Its other targets (e.g. ~/.aws, ~/.gitconfig-payzen) are left alone: they may hold local state.
+set -eu # no pipefail: find errors (permissions) must not abort the prune
+src={{ .chezmoi.sourceDir | quote }}
+{
+  find "$HOME" -maxdepth 1 -type l
+  for d in "$HOME/.config" "$HOME/.kube" "$HOME/.docker" "$HOME/.aws" "$HOME/.ssh" "$HOME/Library/KeyBindings"; do
+    if [ -d "$d" ]; then find "$d" -maxdepth 4 -type l; fi
+  done
+} 2>/dev/null | while IFS= read -r link; do
+  [ -e "$link" ] && continue
+  case "$(readlink "$link")" in
+    "$src"/*) rm -f "$link" && echo "removed dangling symlink: $link" ;;
+  esac
+done
+{{- range $name, $_ := .profile_catalog }}
+{{-   if not (has $name $.profiles) }}
+
+if [ -d "$HOME/.config/shell/profile-{{ $name }}" ]; then
+  rm -rf "$HOME/.config/shell/profile-{{ $name }}"
+  echo "removed layer of inactive profile {{ $name }}: ~/.config/shell/profile-{{ $name }}"
+fi
+{{-   end }}
+{{- end }}
+exit 0

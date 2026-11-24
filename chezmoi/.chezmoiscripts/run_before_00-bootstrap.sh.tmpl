@@ -17,7 +17,7 @@ done
 
 if ! command -v op >/dev/null 2>&1 || ! command -v fish >/dev/null 2>&1 || ! command -v gpg >/dev/null 2>&1; then
   echo "installing bootstrap packages"
-  brew bundle --file=/dev/stdin <<EOF
+  brew bundle --no-upgrade --file=/dev/stdin <<EOF
 brew "fish"
 brew "git"
 brew "gnupg"
@@ -87,10 +87,11 @@ fi
 # 1Password CLI must be connected to the account: needed the first time files are created
 # from 1Password (create_ templates, gpg import). Set DOTFILES_SKIP_1PASSWORD=1 to skip (e.g. headless box).
 if [ -z "${DOTFILES_SKIP_1PASSWORD:-}" ] && ! op account list --format=json 2>/dev/null | grep -q '{{ .onepassword_config.account }}'; then
-  printf '\n%s\n%s\n%s\n%s\n\n' \
+  printf '\n%s\n%s\n%s\n%s\n%s\n\n' \
     "=====================================================================" \
     "1Password CLI is not connected to the personal account." \
-    "open 1Password, sign in, enable Settings -> Developer -> CLI integration (and SSH agent), then re-run chezmoi apply" \
+    "open 1Password, sign in, enable Settings -> Developer -> CLI integration (and SSH agent), then re-run:" \
+    "  {{ .chezmoi.executable }} apply" \
     "=====================================================================" >&2
   exit 1
 fi

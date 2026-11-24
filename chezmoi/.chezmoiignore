@@ -6,9 +6,6 @@ Library
 Library/**
 .chezmoiscripts/darwin/**
 {{- end }}
-{{- if ne .chezmoi.os "linux" }}
-.chezmoiscripts/linux/**
-{{- end }}
 
 # iTerm2 reads/writes its prefs directly in the source dir
 # (PrefsCustomFolder, set by .chezmoiscripts/darwin/...-macos-app-settings), never deployed
@@ -16,6 +13,11 @@ Library/**
 .config/iterm2-config/**
 
 # --- profile layers (see .chezmoidata/profiles.yaml) ----------------------------
+{{- range .profiles }}
+{{-   if not (hasKey $.profile_catalog .) }}
+{{-     fail (printf "unknown profile %q in ~/.config/chezmoi/chezmoi.toml (known: %s); fix with `chezmoi init --prompt`" . (keys $.profile_catalog | sortAlpha | join ", ")) }}
+{{-   end }}
+{{- end }}
 {{- range $name, $profile := .profile_catalog }}
 {{-   if not (has $name $.profiles) }}
 .config/shell/profile-{{ $name }}

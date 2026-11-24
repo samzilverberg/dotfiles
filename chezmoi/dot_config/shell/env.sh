@@ -7,7 +7,6 @@
 export EDITOR="nvim"
 export VISUAL="nvim"
 export LANG="en_US.UTF-8"
-export LC_ALL="en_US.UTF-8"
 
 export BAT_THEME="Monokai Extended"
 export EZA_COLORS="da=1;34:di=1;34"

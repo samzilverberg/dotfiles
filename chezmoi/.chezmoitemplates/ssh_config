@@ -7,13 +7,22 @@ Include ~/.ssh/conductor_config
 
 Host github
   HostName github.com
+  User git
 
-Host *
-  # keys are served by the 1Password SSH agent (no private keys on disk);
-  # which items it offers: ~/.config/1Password/ssh/agent.toml
+# Bitbucket moved SSH to ssh.bitbucket.org (Nov 2026); same host keys, so reuse the known_hosts entry
+Host bitbucket.org bitbucket
+  HostName ssh.bitbucket.org
+  HostKeyAlias bitbucket.org
+  User git
+
+# keys are served by the 1Password SSH agent (no private keys on disk);
+# which items it offers: ~/.config/1Password/ssh/agent.toml
+# Only when its socket exists and this isn't an incoming SSH session, so a forwarded agent
+# (ssh -A into this machine) or a headless box without 1Password keeps using $SSH_AUTH_SOCK.
 {{- if eq .chezmoi.os "darwin" }}
+Match exec "test -z \"$SSH_CONNECTION\" && test -S \"$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock\""
   IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
 {{- else }}
+Match exec "test -z \"$SSH_CONNECTION\" && test -S \"$HOME/.1password/agent.sock\""
   IdentityAgent ~/.1password/agent.sock
 {{- end }}
-  IgnoreUnknown UseKeychain

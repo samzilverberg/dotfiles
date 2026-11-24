@@ -7,17 +7,22 @@ _dotfiles_load_env() {
 
   local dir os f line dirs d p
   dir="${XDG_CONFIG_HOME:-$HOME/.config}/shell"
-  case "$(uname -s)" in
-    Darwin) os=darwin ;;
-    Linux) os=linux ;;
+  case "${OSTYPE:-$(uname -s)}" in
+    darwin* | Darwin*) os=darwin ;;
+    linux* | Linux*) os=linux ;;
     *) os=other ;;
   esac
 
-  for f in "$dir/env.sh" "$dir/env.$os.sh" "$dir"/profile-*/env.sh "$dir"/profile-*/env."$os".sh; do
-    [ -f "$f" ] && . "$f"
-  done
+  # env vars: once per session; child shells inherit the exported values
+  if [ -z "${DOTFILES_ENV_LOADED:-}" ]; then
+    for f in "$dir/env.sh" "$dir/env.$os.sh" "$dir"/profile-*/env.sh "$dir"/profile-*/env."$os".sh; do
+      [ -f "$f" ] && . "$f"
+    done
+    export DOTFILES_ENV_LOADED=1
+  fi
 
-  # PATH: collect dirs in priority order, then prepend them in reverse
+  # PATH (every time: login shells / path_helper may have reordered it):
+  # collect dirs in priority order, then prepend them in reverse
   dirs=""
   for f in "$dir/paths" "$dir/paths.$os"; do
     [ -f "$f" ] || continue
@@ -36,13 +41,14 @@ $dirs"
   while IFS= read -r d; do
     [ -n "$d" ] && [ -d "$d" ] || continue
     p=":$PATH:"
-    p="${p//:"$d":/:}"
+    # loop: a single ${//} pass misses adjacent duplicates (:d:d:)
+    while [ "$p" != "${p//:"$d":/:}" ]; do p="${p//:"$d":/:}"; done
     p="${p#:}"
     p="${p%:}"
     PATH="$d${p:+:$p}"
-  done <<EOF
+  done <<EOF2
 $dirs
-EOF
+EOF2
   export PATH
 }
 _dotfiles_load_env

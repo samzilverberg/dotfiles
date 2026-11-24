@@ -5,7 +5,7 @@
 set -euo pipefail
 
 command -v gpg >/dev/null 2>&1 || { echo "gpg not installed, skipping gpg import"; exit 0; }
-gpg --list-secret-keys 2>/dev/null | grep -q '^sec' && exit 0
+[ -n "$(gpg --list-secret-keys --with-colons 2>/dev/null)" ] && exit 0
 if [ -n "${DOTFILES_SKIP_1PASSWORD:-}" ]; then
   echo "no gpg secret keys and DOTFILES_SKIP_1PASSWORD set: skipping gpg import"
   exit 0

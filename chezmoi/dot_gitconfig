@@ -1,5 +1,7 @@
 [push]
-	default = simple
+	autoSetupRemote = true
+[fetch]
+	prune = true
 [pull]
 	ff = only
 [user]
@@ -8,7 +10,6 @@
 	signingkey = 2057E1B1377C5C63
 [core]
 	autocrlf = input
-	filemode = true
 	excludesfile = ~/.gitignore_global
 [alias]
 # only for github remotes
@@ -94,3 +95,15 @@
 	path = ~/.gitconfig-payzen
 [includeIf "hasconfig:remote.*.url:https://github.com/payzen-code/**"]
 	path = ~/.gitconfig-payzen
+[includeIf "hasconfig:remote.*.url:ssh://git@github.com/payzen-code/**"]
+	path = ~/.gitconfig-payzen
+[includeIf "hasconfig:remote.*.url:git@github:payzen-code/**"]
+	path = ~/.gitconfig-payzen
+[includeIf "hasconfig:remote.*.url:github:payzen-code/**"]
+	path = ~/.gitconfig-payzen
+
+# machine-local overrides, not in this repo (e.g. a headless box without the gpg key:
+#   [commit] gpgsign = false). Last, so it wins. NOTE: `git config --global` writes to
+# ~/.gitconfig, which is a symlink into the public dotfiles repo: use `git config -f ~/.gitconfig.local`.
+[include]
+	path = ~/.gitconfig.local
