@@ -1,0 +1,122 @@
+# Packages installed by .chezmoiscripts/run_onchange_before_20-packages.sh.tmpl
+# (re-runs whenever the rendered list changes). Nothing is ever uninstalled automatically.
+packages:
+  darwin:
+    taps: []
+    brews:
+      - git
+      - gnupg
+      - pinentry-mac
+      - coreutils
+      - wget
+      - httpie
+      - jq
+      - fish
+      - fisher
+      - zsh
+      - antigen
+      - starship
+      - zoxide
+      - fzf
+      - mise
+      - bat
+      - eza
+      - the_silver_searcher
+      - neovim
+      - lazygit
+      - gh
+      - chezmoi
+      - gitleaks
+      - git-filter-repo
+      - rtk
+      - telnet
+      - ffmpeg
+      - yt-dlp
+      - kubernetes-cli
+      - k9s
+      - helm
+      - krew
+      - awscli
+    casks:
+      - 1password
+      - 1password-cli
+      - iterm2
+      - firefox
+      - google-chrome
+      - zen
+      - bettertouchtool
+      - raycast
+      - jordanbaird-ice
+      - ddpm
+      - docker-desktop
+      - dropbox
+      - syncthing-app
+      - tailscale-app
+      - macfuse
+      - veracrypt
+      - font-hack-nerd-font
+      - font-meslo-lg-nerd-font
+      - obsidian
+      - qlmarkdown
+      - slack
+      - spotify
+      - zoom
+      - visual-studio-code
+      - webstorm
+      - gcloud-cli
+      - claude
+      - t3-code
+      - token-monitor
+
+  # Linux: native package managers only (no Homebrew). Picked by the distro family.
+  apt:
+    - git
+    - curl
+    - wget
+    - gnupg
+    - openssh-client
+    - fish
+    - zsh
+    - zsh-antigen
+    - jq
+    - fzf
+    - zoxide
+    - bat            # binary is `batcat` on Debian/Ubuntu, fish config aliases it
+    - silversearcher-ag
+    - neovim
+    - httpie
+    - unzip
+  dnf:
+    - git
+    - curl
+    - wget
+    - gnupg2
+    - openssh-clients
+    - fish
+    - zsh
+    - jq
+    - fzf
+    - zoxide
+    - bat
+    - the_silver_searcher
+    - neovim
+    - httpie
+    - unzip
+  # Linux tools not (reliably) packaged by distros: installed to ~/.local/bin via upstream installers if missing
+  linux_installers:
+    - starship
+    - mise
+
+  profiles:
+    payzen:
+      darwin:
+        taps:
+          - hashicorp/tap
+        brews:
+          - docker-credential-helper-ecr
+          - hashicorp/tap/terraform
+          - temporal
+          - crane
+          - actionlint
+          - googleworkspace-cli
+        casks: []

@@ -1,4 +1,0 @@
-# PZ_PLUGIN_HOME="${ZDOTDIR:-$HOME/.config/zsh}/plugins"
-# [[ -d $PZ_PLUGIN_HOME/pz ]] ||
-#   git clone https://github.com/mattmc3/pz.git $PZ_PLUGIN_HOME/pz
-# source $PZ_PLUGIN_HOME/pz/pz.zsh

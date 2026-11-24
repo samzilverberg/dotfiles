@@ -1,0 +1,2 @@
+# Linux PATH entries, in priority order (placed after the entries in ./paths)
+~/.local/share/pnpm

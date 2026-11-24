@@ -1,0 +1,5 @@
+#!/bin/sh
+# switch k8s namespace of the current context
+set -eu
+[ $# -eq 1 ] || { echo "usage: kcn <namespace>" >&2; exit 1; }
+exec kubectl config set-context --current --namespace "$1"

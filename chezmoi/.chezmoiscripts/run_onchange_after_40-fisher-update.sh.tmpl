@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Syncs fish plugins whenever ~/.config/fish/fish_plugins changes.
+# fish_plugins hash: {{ include "dot_config/fish/fish_plugins" | sha256sum }}
+set -euo pipefail
+command -v fish >/dev/null 2>&1 || exit 0
+# brew ships fisher on macOS; elsewhere load it for this run only
+fish -c '
+if not functions -q fisher
+    curl -fsSL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source
+end
+fisher update'

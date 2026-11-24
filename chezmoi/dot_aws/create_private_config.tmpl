@@ -1,0 +1,23 @@
+# payzen profile. Generated ONCE by chezmoi from 1Password item "{{ .profile_catalog.payzen.onepassword_item }}" (vault: dotfiles);
+# afterwards this file is yours to edit (chezmoi won't overwrite it). To regenerate: rm ~/.aws/config && chezmoi apply
+{{- $f := dict }}
+{{- range $label, $field := onepasswordItemFields .profile_catalog.payzen.onepassword_item .onepassword_config.vault .onepassword_config.account }}{{ $_ := set $f $label $field.value }}{{ end }}
+{{- range list "aws_account_staging" "aws_account_prod" "aws_sso_start_url" "cdn_bucket" }}{{ if not (hasKey $f .) }}{{ fail (printf "1Password item %q (vault %q) is missing field %q" $.profile_catalog.payzen.onepassword_item $.onepassword_config.vault .) }}{{ end }}{{ end }}
+[profile default]
+region = us-east-1
+output = json
+sso_session = jumpcloud
+sso_account_id = {{ index $f "aws_account_staging" }}
+sso_role_name = PowerUserAccess
+# for devops sso_role_name = AdministratorAccess
+
+[profile prod]
+region = us-east-1
+output = json
+sso_session = jumpcloud
+sso_account_id = {{ index $f "aws_account_prod" }}
+sso_role_name = EngineeringLeadsProd
+
+[sso-session jumpcloud]
+sso_region = us-east-1
+sso_start_url = {{ index $f "aws_sso_start_url" }}

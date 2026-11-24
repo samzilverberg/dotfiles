@@ -1,0 +1,7 @@
+# payzen profile: loaded via includeIf in ~/.gitconfig for any repo with a payzen-code remote.
+# Generated ONCE from 1Password item "{{ .profile_catalog.payzen.onepassword_item }}"; to regenerate: rm ~/.gitconfig-payzen && chezmoi apply
+{{- $f := onepasswordItemFields .profile_catalog.payzen.onepassword_item .onepassword_config.vault .onepassword_config.account }}
+{{- range list "git_email" "git_signingkey" }}{{ if not (hasKey $f .) }}{{ fail (printf "1Password item %q is missing field %q" $.profile_catalog.payzen.onepassword_item .) }}{{ end }}{{ end }}
+[user]
+	email = {{ (index $f "git_email").value }}
+	signingkey = {{ (index $f "git_signingkey").value }}

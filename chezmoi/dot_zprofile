@@ -1,0 +1,3 @@
+# Login zsh. On macOS /etc/zprofile runs path_helper after ~/.zshenv, which pushes system dirs
+# (/usr/bin...) ahead of ours. Re-apply the shared PATH order (idempotent).
+[ -f "$HOME/.config/shell/load-env.sh" ] && . "$HOME/.config/shell/load-env.sh"

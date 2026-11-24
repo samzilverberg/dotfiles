@@ -1,0 +1,17 @@
+#!/bin/sh
+# k8s logs for a deployment (by app label) or pod matching <name>, health checks filtered out
+# usage: klogs <name> [extra kubectl logs args...]
+set -u
+[ $# -ge 1 ] || { echo "usage: klogs <name> [kubectl logs args...]" >&2; exit 1; }
+name=$1
+shift
+label=$(kubectl get deployments | grep "$name" | awk '{ print $1 }' | head -1)
+if [ -z "$label" ]; then
+  echo "didnt find any deployments for input: '$name', trying pods"
+  pod=$(kubectl get pods | grep "$name" | awk '{ print $1 }' | head -1)
+  [ -n "$pod" ] || { echo "didnt find any pods for input: '$name'"; exit 1; }
+  kubectl logs "$pod" "$@" | grep -v -E 'liveness|readiness'
+else
+  echo "getting logs for label: $label"
+  kubectl logs -l "app=$label" --tail=-1 "$@" | grep -v -E 'liveness|readiness'
+fi

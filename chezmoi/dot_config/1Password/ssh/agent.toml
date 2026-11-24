@@ -1,0 +1,6 @@
+# 1Password SSH agent: which keys it offers (default is only the Personal/Private vault).
+# https://developer.1password.com/docs/ssh/agent/config
+# Order matters: servers like GitHub accept the first key that matches an account.
+
+[[ssh-keys]]
+vault = "dotfiles"

@@ -1,0 +1,22 @@
+# Profiles = extra layers applied on top of the base dotfiles.
+# A machine picks its profiles at `chezmoi init` (stored as .profiles in ~/.config/chezmoi/chezmoi.toml).
+#
+# Everything a profile owns is skipped (.chezmoiignore) on machines without that profile:
+#   - ~/.config/shell/profile-<name>/   env.sh, aliases.sh, config.fish, bin/  (auto-loaded by every shell)
+#   - the extra target paths listed under `targets`
+#   - packages under packages.profiles.<name> (.chezmoidata/packages.yaml)
+#
+# Values that should not be in this public repo live in 1Password (vault "dotfiles")
+# and are written once via create_ templates, so a normal `chezmoi apply` never calls 1Password.
+
+# default when the machine config has no profiles yet (overridden by [data] in chezmoi.toml)
+profiles: []
+
+profile_catalog:
+  payzen:
+    description: PayZen work machine
+    onepassword_item: payzen-profile   # fields: aws_account_staging, aws_account_prod, aws_sso_start_url, cdn_bucket, git_email, git_signingkey
+    targets:
+      - .aws
+      - .aws/**
+      - .gitconfig-payzen

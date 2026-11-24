@@ -81,3 +81,16 @@
 	stash = 8 normal
 	grafted = 232 normal bold
 	HEAD = 14 normal dim
+[credential "https://github.com"]
+	helper =
+	helper = !gh auth git-credential
+[credential "https://gist.github.com"]
+	helper =
+	helper = !gh auth git-credential
+
+# PayZen identity (payzen profile): any repo whose remote points at the payzen-code GitHub org.
+# ~/.gitconfig-payzen only exists on machines with the payzen profile; git ignores a missing include.
+[includeIf "hasconfig:remote.*.url:git@github.com:payzen-code/**"]
+	path = ~/.gitconfig-payzen
+[includeIf "hasconfig:remote.*.url:https://github.com/payzen-code/**"]
+	path = ~/.gitconfig-payzen

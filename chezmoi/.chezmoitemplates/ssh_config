@@ -1,23 +1,19 @@
-# NOTE: dont edit this file directly
-# instead edit the template in chezmoi/.chezmoitemplates/ssh_config
+# NOTE: managed by chezmoi, dont edit ~/.ssh/config directly
+# edit chezmoi/.chezmoitemplates/ssh_config, or drop machine-local snippets in ~/.ssh/config.d/
+
+# machine-local / app-generated config (missing files are ignored by ssh)
+Include ~/.ssh/config.d/*
+Include ~/.ssh/conductor_config
 
 Host github
   HostName github.com
-  IdentityFile ~/.ssh/payzen_priv
-  IdentitiesOnly yes
-  AddKeysToAgent yes
-{{- if eq .chezmoi.os "darwin" }}
-  UseKeychain    yes
-{{- end }}
-
-Host bitbucket
-  HostName bitbucket.org
-  IdentityFile ~/.ssh/bitbucket_priv
-  IdentitiesOnly yes
-  AddKeysToAgent yes
-{{- if eq .chezmoi.os "darwin" }}
-  UseKeychain    yes
-{{- end }}
 
 Host *
+  # keys are served by the 1Password SSH agent (no private keys on disk);
+  # which items it offers: ~/.config/1Password/ssh/agent.toml
+{{- if eq .chezmoi.os "darwin" }}
+  IdentityAgent "~/Library/Group Containers/2BUAA49233.com.1password/t/agent.sock"
+{{- else }}
+  IdentityAgent ~/.1password/agent.sock
+{{- end }}
   IgnoreUnknown UseKeychain

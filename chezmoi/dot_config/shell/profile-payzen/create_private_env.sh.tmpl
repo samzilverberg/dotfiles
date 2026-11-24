@@ -1,0 +1,10 @@
+# payzen profile env (fish + POSIX syntax, see ../env.sh).
+# Generated ONCE by chezmoi from 1Password item "{{ .profile_catalog.payzen.onepassword_item }}" (vault: dotfiles);
+# not re-rendered on later applies. To refresh: rm this file && chezmoi apply
+{{- $f := dict }}
+{{- range $label, $field := onepasswordItemFields .profile_catalog.payzen.onepassword_item .onepassword_config.vault .onepassword_config.account }}{{ $_ := set $f $label $field.value }}{{ end }}
+{{- range list "aws_account_staging" "aws_account_prod" "aws_sso_start_url" "cdn_bucket" }}{{ if not (hasKey $f .) }}{{ fail (printf "1Password item %q (vault %q) is missing field %q" $.profile_catalog.payzen.onepassword_item $.onepassword_config.vault .) }}{{ end }}{{ end }}
+export PZ_AWS_ACCOUNT_STAGING="{{ index $f "aws_account_staging" }}"
+export PZ_AWS_ACCOUNT_PROD="{{ index $f "aws_account_prod" }}"
+export AWS_ECR_REGISTRY="{{ index $f "aws_account_staging" }}.dkr.ecr.us-east-1.amazonaws.com"
+export AWS_CDN_BUCKET="{{ index $f "cdn_bucket" }}"

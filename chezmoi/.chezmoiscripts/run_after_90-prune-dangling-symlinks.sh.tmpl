@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# symlink mode: when a file is removed from the source dir its target symlink is left dangling.
+# Remove dangling symlinks that point into the source dir.
+set -eu # no pipefail: find errors (permissions) must not abort the prune
+src={{ .chezmoi.sourceDir | quote }}
+{
+  find "$HOME" -maxdepth 1 -type l
+  for d in "$HOME/.config" "$HOME/.kube" "$HOME/.docker" "$HOME/.aws" "$HOME/.ssh" "$HOME/Library/KeyBindings"; do
+    if [ -d "$d" ]; then find "$d" -maxdepth 4 -type l; fi
+  done
+} 2>/dev/null | while IFS= read -r link; do
+  [ -e "$link" ] && continue
+  case "$(readlink "$link")" in
+    "$src"/*) rm -f "$link" && echo "removed dangling symlink: $link" ;;
+  esac
+done
+exit 0

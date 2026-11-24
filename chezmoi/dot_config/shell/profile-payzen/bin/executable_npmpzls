@@ -1,0 +1,5 @@
+#!/bin/sh
+# list payzen private npm packages (uses the token from ~/.npmrc)
+set -eu
+npm_token=$(grep -o '_authToken=.*' ~/.npmrc | head -1 | sed 's/_authToken=//')
+curl -fsS -H "Authorization: Bearer $npm_token" "https://registry.npmjs.org/-/org/payzen/package" | jq -S .

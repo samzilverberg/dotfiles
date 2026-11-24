@@ -1,0 +1,7 @@
+# PATH entries for ALL shells, one directory per line, highest priority first.
+# `~/` is expanded; missing directories are skipped. OS specific entries: ./paths.<os>
+# Also added automatically (lowest priority): ./bin and ./profile-*/bin
+~/.local/bin
+~/.local/share/mise/shims
+~/.bun/bin
+~/.krew/bin

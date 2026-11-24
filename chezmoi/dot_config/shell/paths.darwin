@@ -1,0 +1,6 @@
+# macOS PATH entries, in priority order (placed after the entries in ./paths)
+/opt/homebrew/bin
+/opt/homebrew/sbin
+/opt/homebrew/share/google-cloud-sdk/bin
+~/Library/pnpm
+~/.docker/bin

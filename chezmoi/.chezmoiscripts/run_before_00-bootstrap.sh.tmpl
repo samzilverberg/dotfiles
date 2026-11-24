@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+# Runs before every apply; cheap & idempotent. Makes sure the basics exist:
+# package manager, git/fish/gnupg, 1Password (app + CLI), fish as login shell.
+set -euo pipefail
+
+SUDO=""
+[ "$(id -u)" -ne 0 ] && SUDO="sudo"
+
+{{ if eq .chezmoi.os "darwin" -}}
+if ! command -v brew >/dev/null 2>&1 && [ ! -x /opt/homebrew/bin/brew ] && [ ! -x /usr/local/bin/brew ]; then
+  echo "🍺 installing Homebrew"
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
+for b in /opt/homebrew/bin/brew /usr/local/bin/brew; do
+  [ -x "$b" ] && { eval "$("$b" shellenv)"; break; }
+done
+
+if ! command -v op >/dev/null 2>&1 || ! command -v fish >/dev/null 2>&1 || ! command -v gpg >/dev/null 2>&1; then
+  echo "installing bootstrap packages"
+  brew bundle --file=/dev/stdin <<EOF
+brew "fish"
+brew "git"
+brew "gnupg"
+brew "pinentry-mac"
+cask "1password"
+cask "1password-cli"
+EOF
+fi
+{{- else if eq .chezmoi.os "linux" }}
+if command -v apt-get >/dev/null 2>&1; then
+  missing=()
+  for p in git curl gnupg fish zsh openssh-client; do dpkg -s "$p" >/dev/null 2>&1 || missing+=("$p"); done
+  if [ ${#missing[@]} -gt 0 ]; then
+    $SUDO apt-get update -qq
+    $SUDO env DEBIAN_FRONTEND=noninteractive apt-get install -y "${missing[@]}"
+  fi
+  if ! command -v op >/dev/null 2>&1; then
+    echo "installing 1Password CLI (+ app on desktops) from 1Password's apt repo"
+    arch="$(dpkg --print-architecture)"
+    curl -fsSL https://downloads.1password.com/linux/keys/1password.asc | $SUDO gpg --dearmor --yes --output /usr/share/keyrings/1password-archive-keyring.gpg
+    echo "deb [arch=$arch signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] https://downloads.1password.com/linux/debian/$arch stable main" | $SUDO tee /etc/apt/sources.list.d/1password.list >/dev/null
+    $SUDO mkdir -p /etc/debsig/policies/AC2D62742012EA22 /usr/share/debsig/keyrings/AC2D62742012EA22
+    curl -fsSL https://downloads.1password.com/linux/debian/debsig/1password.pol | $SUDO tee /etc/debsig/policies/AC2D62742012EA22/1password.pol >/dev/null
+    curl -fsSL https://downloads.1password.com/linux/keys/1password.asc | $SUDO gpg --dearmor --yes --output /usr/share/debsig/keyrings/AC2D62742012EA22/debsig.gpg
+    $SUDO apt-get update -qq
+    pkgs=(1password-cli)
+    [ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ] && pkgs+=(1password)
+    $SUDO env DEBIAN_FRONTEND=noninteractive apt-get install -y "${pkgs[@]}"
+  fi
+elif command -v dnf >/dev/null 2>&1; then
+  missing=()
+  for p in git curl gnupg2 fish zsh openssh-clients; do rpm -q "$p" >/dev/null 2>&1 || missing+=("$p"); done
+  [ ${#missing[@]} -gt 0 ] && $SUDO dnf install -y "${missing[@]}"
+  if ! command -v op >/dev/null 2>&1; then
+    echo "installing 1Password CLI (+ app on desktops) from 1Password's rpm repo"
+    $SUDO rpm --import https://downloads.1password.com/linux/keys/1password.asc
+    printf '%s\n' '[1password]' 'name=1Password Stable Channel' 'baseurl=https://downloads.1password.com/linux/rpm/stable/$basearch' \
+      'enabled=1' 'gpgcheck=1' 'repo_gpgcheck=1' 'gpgkey="https://downloads.1password.com/linux/keys/1password.asc"' \
+      | $SUDO tee /etc/yum.repos.d/1password.repo >/dev/null
+    pkgs=(1password-cli)
+    [ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ] && pkgs+=(1password)
+    $SUDO dnf install -y "${pkgs[@]}"
+  fi
+else
+  echo "unsupported linux distro: no apt-get or dnf. install git, fish, gnupg and 1password-cli manually" >&2
+fi
+{{- end }}
+
+# fish as login shell
+fish_path="$(command -v fish || true)"
+if [ -n "$fish_path" ]; then
+  if ! grep -qx "$fish_path" /etc/shells; then
+    echo "adding $fish_path to /etc/shells"
+    echo "$fish_path" | $SUDO tee -a /etc/shells >/dev/null
+  fi
+{{- if eq .chezmoi.os "darwin" }}
+  current_shell="$(dscl . -read "/Users/$USER" UserShell | awk '{print $2}')"
+{{- else }}
+  current_shell="$(getent passwd "$(id -un)" | cut -d: -f7)"
+{{- end }}
+  if [ "$current_shell" != "$fish_path" ] && [ -t 0 ]; then
+    echo "changing login shell to fish (logout + login afterwards)"
+    chsh -s "$fish_path" || echo "chsh failed, run manually: chsh -s $fish_path" >&2
+  fi
+fi
+
+# 1Password CLI must be connected to the account: needed the first time files are created
+# from 1Password (create_ templates, gpg import). Set DOTFILES_SKIP_1PASSWORD=1 to skip (e.g. headless box).
+if [ -z "${DOTFILES_SKIP_1PASSWORD:-}" ] && ! op account list --format=json 2>/dev/null | grep -q '{{ .onepassword_config.account }}'; then
+  printf '\n%s\n%s\n%s\n%s\n\n' \
+    "=====================================================================" \
+    "1Password CLI is not connected to the personal account." \
+    "open 1Password, sign in, enable Settings -> Developer -> CLI integration (and SSH agent), then re-run chezmoi apply" \
+    "=====================================================================" >&2
+  exit 1
+fi

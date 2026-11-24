@@ -1,0 +1,3 @@
+#!/bin/sh
+# tear down all docker compose projects (containers, networks, volumes)
+docker compose ls -aq | xargs -P3 -n1 -I{} docker compose -p {} down -v -t 5

@@ -1,0 +1,6 @@
+#!/bin/sh
+# mass rename files whose path matches <lookup>: copy-pasta-file <lookup> <replace>
+set -eu
+[ $# -eq 2 ] || { echo "usage: copy-pasta-file <lookup> <replace>" >&2; exit 1; }
+ag --ignore-dir node_modules --ignore-dir build --ignore tsconfig.build.tsbuildinfo -l -g "$1" \
+  | sed -e "p;s/$1/$2/g" | xargs -n2 mv

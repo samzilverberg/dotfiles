@@ -1,0 +1,27 @@
+# target paths chezmoi must NOT manage on this machine (rendered as a template)
+
+# --- OS layers ---------------------------------------------------------------
+{{- if ne .chezmoi.os "darwin" }}
+Library
+Library/**
+.chezmoiscripts/darwin/**
+{{- end }}
+{{- if ne .chezmoi.os "linux" }}
+.chezmoiscripts/linux/**
+{{- end }}
+
+# iTerm2 reads/writes its prefs directly in the source dir
+# (PrefsCustomFolder, set by .chezmoiscripts/darwin/...-macos-app-settings), never deployed
+.config/iterm2-config
+.config/iterm2-config/**
+
+# --- profile layers (see .chezmoidata/profiles.yaml) ----------------------------
+{{- range $name, $profile := .profile_catalog }}
+{{-   if not (has $name $.profiles) }}
+.config/shell/profile-{{ $name }}
+.config/shell/profile-{{ $name }}/**
+{{-     range $profile.targets }}
+{{ . }}
+{{-     end }}
+{{-   end }}
+{{- end }}

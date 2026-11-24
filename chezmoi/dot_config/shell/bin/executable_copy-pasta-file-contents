@@ -1,0 +1,7 @@
+#!/bin/sh
+# mass search & replace inside files (regex, perl syntax): copy-pasta-file-contents <lookup> <replace>
+set -eu
+[ $# -eq 2 ] || { echo "usage: copy-pasta-file-contents <lookup> <replace>" >&2; exit 1; }
+# shellcheck disable=SC2016 # $ENV{...} is perl, not shell
+ag --ignore-dir node_modules --ignore-dir build --ignore tsconfig.build.tsbuildinfo -l "$1" \
+  | LOOKUP=$1 REPLACE=$2 xargs perl -pi -e 's/$ENV{LOOKUP}/$ENV{REPLACE}/g'

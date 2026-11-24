@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Imports the gpg keys (commit signing) from 1Password if this machine has no secret key yet.
+# Every apply, but only calls 1Password when keys are missing. Secrets are read at runtime
+# (op read), never rendered into this script.
+set -euo pipefail
+
+command -v gpg >/dev/null 2>&1 || { echo "gpg not installed, skipping gpg import"; exit 0; }
+gpg --list-secret-keys 2>/dev/null | grep -q '^sec' && exit 0
+if [ -n "${DOTFILES_SKIP_1PASSWORD:-}" ]; then
+  echo "no gpg secret keys and DOTFILES_SKIP_1PASSWORD set: skipping gpg import"
+  exit 0
+fi
+
+ref="op://{{ .onepassword_config.vault }}/{{ .onepassword_config.gpg_item }}"
+acct="{{ .onepassword_config.account }}"
+echo "no gpg secret keys found, importing from 1Password"
+op read --account "$acct" "$ref/gpg_all_public.asc" | gpg --batch --import
+op read --account "$acct" "$ref/gpg_all_private.asc" | gpg --batch --import
+op read --account "$acct" "$ref/gpg_trust_levels.txt" | grep -v '^\s*$' | gpg --import-ownertrust
