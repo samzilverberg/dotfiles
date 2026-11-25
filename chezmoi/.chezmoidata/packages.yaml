@@ -50,6 +50,7 @@ packages:
       - bettertouchtool
       - raycast
       - jordanbaird-ice
+      - vorssaint
       - ddpm
       - docker-desktop
       - dropbox
@@ -69,7 +70,6 @@ packages:
       - gcloud-cli
       - claude
       - t3-code
-      - token-monitor
 
   # Linux: native package managers only (no Homebrew). Picked by the distro family.
   apt:

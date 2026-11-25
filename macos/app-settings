@@ -1,0 +1,127 @@
+#!/bin/sh
+# Sync app settings that can't live in $HOME as plain dotfiles <-> snapshot files next to this script.
+#
+#   app-settings export          snapshot linked apps into this folder (only writes on real changes).
+#                                Runs automatically as a chezmoi hook before status/diff/apply/git (.chezmoi.toml.tmpl).
+#   app-settings import          restore snapshots on a new machine, then link the app.
+#                                Runs once per machine via .chezmoiscripts/run_once_after_50-app-settings-import.sh.
+#   app-settings import --force  overwrite the app's current settings with the snapshot, then link.
+#   app-settings adopt           keep the app's current settings; link, so the next export replaces the snapshot.
+#
+# Guard: export only touches an app's snapshot once this machine is "linked" for it (marker in
+# $XDG_STATE_HOME/app-settings). Linking happens on import, on adopt, or when the app's settings already
+# equal the snapshot. So an app installed and set up by hand on a fresh machine never overwrites the backup.
+#
+# Add an app: append its name to APPS and define <name>_file, <name>_installed, <name>_setup,
+# <name>_export FILE, <name>_import FILE below. Snapshots are committed to a PUBLIC repo: no secrets.
+set -u
+APPS="vorssaint"
+dir=$(cd "$(dirname "$0")" && pwd)
+state="${XDG_STATE_HOME:-$HOME/.local/state}/app-settings"
+
+# --- Vorssaint: its own export/import commands. Never put the file at ~/.config/vorssaint/settings.plist:
+# Vorssaint re-applies that path on every launch and would revert changes made in the app.
+vorssaint_file=vorssaint-settings.plist
+vorssaint_bin=/Applications/Vorssaint.app/Contents/MacOS/Vorssaint
+vorssaint_installed() { [ -x "$vorssaint_bin" ]; }
+vorssaint_setup() { defaults read com.vorssaint.utils hasOnboarded >/dev/null 2>&1; }
+vorssaint_export() { "$vorssaint_bin" --export-settings "$1" >/dev/null && normalize_plist "$1"; }
+vorssaint_import() {
+  running=0
+  pgrep -xq Vorssaint && running=1
+  osascript -e 'if application id "com.vorssaint.utils" is running then tell application id "com.vorssaint.utils" to quit' >/dev/null 2>&1
+  [ "$running" = 1 ] && sleep 2
+  "$vorssaint_bin" --import-settings "$1" >/dev/null || return 1
+  [ "$running" = 0 ] || open -a Vorssaint
+}
+
+# Sort plist keys and JSON-in-string values, so unchanged settings produce a byte-identical snapshot.
+normalize_plist() {
+  /usr/bin/python3 -I - "$1" <<'EOF'
+import json, plistlib, sys
+path = sys.argv[1]
+with open(path, "rb") as f:
+    data = plistlib.load(f)
+def norm(v):
+    if isinstance(v, str) and v[:1] in "{[":
+        try:
+            return json.dumps(json.loads(v), sort_keys=True, separators=(",", ":"))
+        except ValueError:
+            return v
+    if isinstance(v, dict):
+        return {k: norm(x) for k, x in v.items()}
+    if isinstance(v, list):
+        return [norm(x) for x in v]
+    return v
+with open(path, "wb") as f:
+    plistlib.dump(norm(data), f, fmt=plistlib.FMT_XML, sort_keys=True)
+EOF
+}
+
+say() { echo "app-settings: $*" >&2; }
+linked() { [ -f "$state/$1" ]; }
+link() { mkdir -p "$state" && date >"$state/$1"; }
+snapshot() { eval "echo \"\$dir/\$${1}_file\""; }
+
+# Export the app's current settings to $tmp/<app>; true when they equal the committed snapshot.
+fresh_matches() {
+  "${1}_export" "$tmp/$1" 2>/dev/null || return 2
+  [ -f "$(snapshot "$1")" ] || return 1
+  cmp -s "$tmp/$1" "$(snapshot "$1")" || return 1
+}
+
+do_export() {
+  for app in $APPS; do
+    "${app}_installed" && "${app}_setup" || continue
+    snap=$(snapshot "$app")
+    fresh_matches "$app"; rc=$?
+    [ "$rc" = 2 ] && { say "$app export failed"; continue; }
+    if ! linked "$app"; then
+      if [ ! -f "$snap" ] || [ "$rc" = 0 ]; then
+        link "$app"   # no backup to protect yet, or already identical
+      else
+        say "$app: settings here differ from macos/$(basename "$snap") and this machine isn't linked, so the backup is left alone."
+        say "  restore the backup: $0 import --force   |   keep this machine's settings: $0 adopt"
+        continue
+      fi
+    fi
+    if [ "$rc" != 0 ]; then
+      cp "$tmp/$app" "$snap" && chmod 644 "$snap" && say "updated macos/$(basename "$snap")"
+    fi
+  done
+}
+
+do_import() {
+  force=${1:-}
+  for app in $APPS; do
+    snap=$(snapshot "$app")
+    [ -f "$snap" ] && "${app}_installed" || continue
+    if linked "$app" && [ "$force" != --force ]; then
+      continue
+    elif "${app}_setup" && [ "$force" != --force ]; then
+      fresh_matches "$app" && { link "$app"; continue; }
+      say "$app is already set up here with different settings; not importing."
+      say "  restore the backup: $0 import --force   |   keep this machine's settings: $0 adopt"
+    elif "${app}_import" "$snap"; then
+      link "$app" && say "imported $app from macos/$(basename "$snap") (re-grant its permissions in the app)"
+    else
+      say "importing $app failed"
+    fi
+  done
+}
+
+do_adopt() {
+  for app in ${1:-$APPS}; do
+    "${app}_installed" && link "$app" && say "$app linked; next export replaces macos/$(eval "echo \$${app}_file")"
+  done
+}
+
+tmp=$(mktemp -d) || exit 0
+trap 'rm -rf "$tmp"' EXIT
+case "${1:-}" in
+  export) do_export ;;
+  import) do_import "${2:-}" ;;
+  adopt) do_adopt "${2:-}" ;;
+  *) say "usage: app-settings export | import [--force] | adopt [app]"; exit 2 ;;
+esac
+exit 0

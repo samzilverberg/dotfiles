@@ -38,6 +38,15 @@ umask = 0o077
 [diff]
     exclude = ["scripts"]
 
+# snapshot app settings that can't be plain dotfiles into macos/ (see macos/app-settings),
+# so status/diff/apply/git always see current settings. Never fails the chezmoi command.
+[hooks.read-source-state.pre]
+    command = "/bin/sh"
+    args = ["-c", "[ -x \"$CHEZMOI_WORKING_TREE/macos/app-settings\" ] && \"$CHEZMOI_WORKING_TREE/macos/app-settings\" export; true"]
+[hooks.git.pre]
+    command = "/bin/sh"
+    args = ["-c", "[ -x \"$CHEZMOI_WORKING_TREE/macos/app-settings\" ] && \"$CHEZMOI_WORKING_TREE/macos/app-settings\" export; true"]
+
 [onepassword]
 {{- if eq .chezmoi.os "darwin" }}
     # absolute path: on a fresh mac, brew (and op) are installed by the bootstrap

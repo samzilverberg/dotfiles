@@ -24,7 +24,7 @@ There is no gpg key and no 1Password SSH agent there, so put local overrides in 
 
 ```
 install.sh                  bootstrap one-liner target
-macos/                      manual-import extras (BetterTouchTool preset)
+macos/                      manual-import app settings (see "Manual app settings")
 chezmoi/                    chezmoi source dir (.chezmoiroot)
   .chezmoi.toml.tmpl        machine config: profiles, 1Password cli path, symlink mode
   .chezmoidata/
@@ -87,6 +87,21 @@ signed in with `op account list`):
 
 The GitHub workflow token (payzen) stays in the macOS keychain:
 `security add-generic-password -U -a "$USER" -s GITHUB_WORKFLOW_TOKEN -w <token>`.
+
+## Manual app settings
+
+Apps whose settings can't live in `$HOME` as a plain dotfile keep a snapshot in `macos/` (not deployed).
+
+- **Automatic (`macos/app-settings`):** Vorssaint. A chezmoi hook exports a fresh snapshot before
+  `chezmoi status / diff / apply / git` (only writes on real changes), so commit it with the rest. On a
+  new machine the `run_once_after_50-app-settings-import` script imports it after packages are installed
+  (skipped if the app was already set up). Re-grant the app's permissions afterwards.
+  Guard: export only overwrites a snapshot once the machine is linked for that app (marker in
+  `~/.local/state/app-settings/`, set by import, or when settings already match). If you set an app up by
+  hand on a new Mac first, chezmoi warns instead: `macos/app-settings import --force` restores the backup,
+  `macos/app-settings adopt` keeps the machine's settings.
+  Add an app: register its export/import commands in `macos/app-settings`.
+- **By hand:** BetterTouchTool, `macos/Default.bttpreset` (BTT → Presets → Export / Import).
 
 ## Day to day
 
