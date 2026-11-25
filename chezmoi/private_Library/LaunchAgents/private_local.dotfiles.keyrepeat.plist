@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Key repeat of 40ms. macOS prefs (defaults KeyRepeat) only take whole 1/60 s steps (2 = 33ms, 3 = 50ms),
+  so set the HID value directly at login (after loginwindow applied the prefs, hence the sleep).
+  Managed by chezmoi; the macOS settings script also applies it right away.
+  check: hidutil property get HIDKeyRepeat   (nanoseconds)
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>local.dotfiles.keyrepeat</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/sh</string>
+    <string>-c</string>
+    <string>sleep 5; /usr/bin/hidutil property --set '{"HIDKeyRepeat":40000000}' >/dev/null</string>
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+</dict>
+</plist>

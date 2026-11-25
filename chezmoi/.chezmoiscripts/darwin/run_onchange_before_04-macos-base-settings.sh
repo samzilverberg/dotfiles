@@ -86,13 +86,16 @@ defaults write com.apple.AppleMultitouchTrackpad TrackpadTwoFingerFromRightEdgeS
 # Disable the "Are you sure you want to open this application?" dialog.
 defaults write com.apple.LaunchServices LSQuarantine -bool false
 
-# Fast keyboard repeat. Units of 1/60 s: KeyRepeat 3 = 50ms between repeats (1 and 2 felt too fast;
-# the fastest System Settings slider step is 2), InitialKeyRepeat 15 = 250ms delay (shortest slider step).
-# Applied live by `activateSettings -u` below; check: ioreg -n IOHIDSystem -r -l | grep HIDKeyRepeat
-defaults write -g KeyRepeat -int 3
+# Keyboard repeat: 40ms between repeats, 250ms delay before repeating starts.
+# Prefs only take whole 1/60 s steps (KeyRepeat 2 = 33ms too fast, 3 = 50ms too slow), so prefs say
+# 2 (fallback) and the exact 40ms is set via hidutil: below for right now, and at every login by
+# ~/Library/LaunchAgents/local.dotfiles.keyrepeat.plist. InitialKeyRepeat 15 = 250ms.
+# check: hidutil property --get HIDKeyRepeat   (nanoseconds)
+defaults write -g KeyRepeat -int 2
 defaults write -g InitialKeyRepeat -int 15
-# press-and-hold shows the accent picker (and then doesn't repeat letters in Cocoa apps)
-defaults write -g ApplePressAndHoldEnabled -bool true
+# no accent picker on press-and-hold: letters repeat like any key.
+# umlauts / ß via option dead keys: ⌥u then a/o/u (+shift) = ä ö ü Ä Ö Ü, ⌥s = ß
+defaults write -g ApplePressAndHoldEnabled -bool false
 
 # disable Services shortcuts that collide with app shortcuts. Services are configured in the
 # pbs domain (key: "<bundle id> - <menu title> - <message>"), not in symbolic hotkeys.
@@ -119,6 +122,8 @@ defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 61 "<dic
 # apply symbolic hotkey changes without logout
 # https://apple.stackexchange.com/questions/405937/how-can-i-enable-keyboard-shortcut-preference-after-modifying-it-through-defaul
 /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u
+# activateSettings re-applies KeyRepeat from prefs (33ms); set the exact 40ms again
+/usr/bin/hidutil property --set '{"HIDKeyRepeat":40000000}' >/dev/null
 
 # reduce padding and spacing on top bar items (e.g. wifi, battery, clock)
 defaults -currentHost write -globalDomain NSStatusItemSpacing -int 10
