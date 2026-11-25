@@ -1,0 +1,93 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- /*
+  ~/.claude/settings.json: chezmoi owns only the keys below and merges them into the live file.
+  Claude Code (and plugin installers) keep writing the rest: permission clicks, /config changes,
+  autoMode, pluginConfigs, plugin-installed hooks. Those stay machine-local and out of this
+  public repo (permissions.allow and autoMode.environment hold work paths and account ids).
+
+    enforced          env.CLAUDE_CODE_PLUGIN_PREFER_HTTPS, includeCoAuthoredBy, marketplace definitions
+    default (if unset) model, effortLevel, editorMode, enabledPlugins entries (a plugin disabled
+                      via /plugin stays disabled)
+    hooks (append)    added only when no hook for that event already runs the same command;
+                      never removes or rewrites existing hooks. cc-status / rtk only if installed.
+
+  Output is re-serialized, so keys come out sorted (same content, different order).
+  Preview: chezmoi diff ~/.claude/settings.json
+*/ -}}
+{{- $home := .chezmoi.homeDir -}}
+{{- $payzen := has "payzen" .profiles -}}
+{{- $s := .chezmoi.stdin | trim | default "{}" | fromJson -}}
+
+{{- /* --- enforced ------------------------------------------------------------------------- */ -}}
+{{- /* github marketplaces over https (gh credential helper), not ssh: every new claude process
+       auto-updates marketplaces, and over ssh each one asks the 1Password agent for approval */ -}}
+{{- $env := get $s "env" | default dict -}}
+{{- $_ := set $env "CLAUDE_CODE_PLUGIN_PREFER_HTTPS" "1" -}}
+{{- $_ := set $s "env" $env -}}
+{{- $_ := set $s "includeCoAuthoredBy" false -}}
+
+{{- $marketplaces := dict
+      "claude-plugins-official" (dict "source" (dict "source" "github" "repo" "anthropics/claude-plugins-official"))
+      "context-mode"            (dict "source" (dict "source" "github" "repo" "mksglu/context-mode"))
+      "obsidian-skills"         (dict "source" (dict "source" "github" "repo" "kepano/obsidian-skills"))
+      "revdiff"                 (dict "source" (dict "source" "github" "repo" "umputun/revdiff") "autoUpdate" true)
+      "mcp-bridge-for-firefox"  (dict "source" (dict "source" "github" "repo" "MashdorDev/mcp-bridge-for-firefox")) -}}
+{{- $plugins := list "context-mode@context-mode" "obsidian@obsidian-skills" "firefox@mcp-bridge-for-firefox" -}}
+{{- if $payzen -}}
+{{-   $_ := set $marketplaces "payzen-ai-hub" (dict "source" (dict "source" "github" "repo" "payzen-code/payzen-ai-hub") "autoUpdate" true) -}}
+{{-   $_ := set $marketplaces "ai-sdlc"       (dict "source" (dict "source" "github" "repo" "payzen-code/ai-sdlc-toolkit") "autoUpdate" true) -}}
+{{-   $plugins = append $plugins "payzen@ai-sdlc" -}}
+{{- end -}}
+{{- $known := get $s "extraKnownMarketplaces" | default dict -}}
+{{- range $name, $m := $marketplaces -}}
+{{-   $_ := set $known $name $m -}}
+{{- end -}}
+{{- $_ := set $s "extraKnownMarketplaces" $known -}}
+
+{{- /* --- defaults (only when unset) ---------------------------------------------------------- */ -}}
+{{- range $k, $v := dict "model" "opus" "effortLevel" "high" "editorMode" "normal" -}}
+{{-   if not (hasKey $s $k) }}{{ $_ := set $s $k $v }}{{ end -}}
+{{- end -}}
+{{- $enabled := get $s "enabledPlugins" | default dict -}}
+{{- range $plugins -}}
+{{-   if not (hasKey $enabled .) }}{{ $_ := set $enabled . true }}{{ end -}}
+{{- end -}}
+{{- $_ := set $s "enabledPlugins" $enabled -}}
+
+{{- /* --- hooks (append if missing) ----------------------------------------------------------- */ -}}
+{{- $want := list (dict "event" "PostToolUse" "matcher" "Edit|Write|MultiEdit"
+                       "command" (printf "bash %q" (joinPath $home ".claude/hooks/post-edit-lint.sh"))) -}}
+{{- if lookPath "rtk" -}}
+{{-   $want = append $want (dict "event" "PreToolUse" "matcher" "Bash" "command" "rtk hook claude") -}}
+{{- end -}}
+{{- /* iTerm2 tab status for Claude sessions; a binary that lives outside this repo */ -}}
+{{- $ccStatus := joinPath $home ".config/iterm2/cc-status" -}}
+{{- if stat $ccStatus -}}
+{{-   range list "Notification" "PermissionRequest" "PostToolUse" "PreToolUse" "SessionEnd" "SessionStart" "Stop" "StopFailure" "SubagentStop" "UserPromptSubmit" -}}
+{{-     $want = append $want (dict "event" . "matcher" "" "command" $ccStatus) -}}
+{{-   end -}}
+{{- end -}}
+{{- if $payzen -}}
+{{-   $hubHook := joinPath $home ".payzen-ai-hub/repo/hub/autoupdate-hook.mjs" -}}
+{{-   $want = append $want (dict "event" "SessionStart" "matcher" ""
+                               "command" (printf "test -f %q && node %q || true" $hubHook $hubHook)) -}}
+{{- end -}}
+
+{{- $hooks := get $s "hooks" | default dict -}}
+{{- range $w := $want -}}
+{{-   $entries := get $hooks $w.event | default list -}}
+{{-   $found := false -}}
+{{-   range $e := $entries -}}
+{{-     range $h := get $e "hooks" | default list -}}
+{{-       if eq (get $h "command" | toString) $w.command }}{{ $found = true }}{{ end -}}
+{{-     end -}}
+{{-   end -}}
+{{-   if not $found -}}
+{{-     $entry := dict "hooks" (list (dict "type" "command" "command" $w.command)) -}}
+{{-     if $w.matcher }}{{ $_ := set $entry "matcher" $w.matcher }}{{ end -}}
+{{-     $_ := set $hooks $w.event (append $entries $entry) -}}
+{{-   end -}}
+{{- end -}}
+{{- $_ := set $s "hooks" $hooks -}}
+
+{{- $s | toPrettyJson }}

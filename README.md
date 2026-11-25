@@ -68,6 +68,26 @@ fish is the daily shell, but apps and AI agents often spawn zsh/bash. They all l
 Wiring: zsh `~/.zshenv` (+ `~/.zprofile`, `~/.zshrc`), bash `~/.bashrc`, fish `conf.d/00-shared-shell.fish`.
 Shell-specific extras stay in `config.fish` / `.zshrc`. Rule of thumb: logic → a script in `bin/`.
 
+## Claude Code settings (`~/.claude/settings.json`)
+
+Claude Code rewrites this file itself (permission clicks, `/config`, plugin installers), and parts of it
+are work-specific, so it is not a managed file. `chezmoi/private_dot_claude/modify_private_settings.json`
+is a modify template: it reads the live file, merges in the keys owned here and leaves the rest alone.
+
+| owned here | how |
+|---|---|
+| `env.CLAUDE_CODE_PLUGIN_PREFER_HTTPS`, `includeCoAuthoredBy`, marketplace definitions (payzen ones with the payzen profile) | enforced |
+| `model`, `effortLevel`, `editorMode`, `enabledPlugins` entries | only when unset (a plugin disabled via `/plugin` stays off) |
+| hooks: `post-edit-lint.sh`, `rtk hook claude`, iTerm2 `cc-status` (if installed), payzen hub autoupdate | appended when missing, never removed |
+
+Everything else (`permissions`, `autoMode`, `pluginConfigs`, plugin-installed hooks) stays machine-local.
+Keys come out sorted after an apply. Invalid JSON in the live file fails the apply instead of overwriting it.
+Preview with `chezmoi diff ~/.claude/settings.json`. Note: the template must not end in `.tmpl`
+(chezmoi would render it once without `.chezmoi.stdin`).
+
+`CLAUDE_CODE_PLUGIN_PREFER_HTTPS`: every new `claude` process auto-updates GitHub marketplaces; over
+SSH each of those asks the 1Password SSH agent for approval. Over HTTPS they use the `gh` credential helper.
+
 ## Secrets (1Password, personal account, vault `dotfiles`)
 
 Nothing secret is committed. Values come from 1Password in two ways, both designed so that a normal
